@@ -1,0 +1,29 @@
+import {test,expect} from '@playwright/test';
+import jsQR from 'jsqr';
+import {PNG} from 'pngjs';
+async function login(page:any){await page.goto('/');await page.getByRole('button',{name:'Medium',exact:false}).click();await page.getByRole('button',{name:'เข้าสู่ร้านของคุณ'}).click();await expect(page.locator('.sidebar')).toBeVisible();}
+async function qr(page:any,table:string){await page.locator('nav').getByRole('button',{name:'QR สั่งอาหาร',exact:true}).click();await page.locator('.qr-table-card').filter({hasText:`โต๊ะ ${table}`}).getByRole('button').click();await page.locator('#qr-base-url').fill('http://127.0.0.1:5188');await expect(page.getByRole('img',{name:'QR Code สำหรับสั่งอาหาร'})).toBeVisible();return page.locator('#customer-qr-link').inputValue();}
+async function addAndSend(page:any,index=0,note=''){await page.locator('.guest-menu-card').nth(index).click();if(note)await page.getByPlaceholder('เช่น ไม่ใส่พริก / แพ้ถั่ว…').fill(note);await page.getByRole('button',{name:'เพิ่มในตะกร้า'}).click();await page.locator('.guest-cart-bar button').click();await page.getByRole('button',{name:'ยืนยันส่งเข้าครัว'}).click();await expect(page.locator('.guest-round').last()).toBeVisible();}
+
+test('real QR decodes, two phones share a bill and new rounds do not replay served food',async({page,browser})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await login(page);const url=await qr(page,'T13');
+ const img=page.getByRole('img',{name:'QR Code สำหรับสั่งอาหาร'});await expect.poll(async()=>{const src=await img.getAttribute('src');if(!src)return '';const png=PNG.sync.read(Buffer.from(src.split(',')[1],'base64'));return jsQR(new Uint8ClampedArray(png.data),png.width,png.height)?.data;}).toBe(url);
+ const c1=await browser.newContext({viewport:{width:390,height:844}}),c2=await browser.newContext({viewport:{width:390,height:844}});
+ const customer=await c1.newPage(),second=await c2.newPage();customer.on('pageerror',e=>errors.push(e.message));
+ // Simulate LAN HTTP where crypto.randomUUID is absent.
+ await customer.addInitScript(()=>Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true}));
+ await customer.goto(url);await expect(customer.locator('.guest-menu-card')).toHaveCount(30);await expect(customer.locator('.sidebar')).toHaveCount(0);await customer.screenshot({path:'/private/tmp/pos-food-customer-menu.png',fullPage:false,animations:'disabled'});
+ expect(await customer.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await addAndSend(customer,0,'ไม่ใส่พริก');
+ await page.getByRole('button',{name:'ปิด',exact:true}).click();await page.locator('nav').getByRole('button',{name:'หน้าจอครัว'}).click();await page.getByRole('button',{name:'รีเฟรชข้อมูล'}).click();const ticket=page.locator('.kitchen-ticket').filter({hasText:'T13'});await expect(ticket).toContainText('ลูกค้าสั่งผ่าน QR');await expect(ticket).toContainText('ไม่ใส่พริก');for(const name of ['เริ่มทำอาหาร','พร้อมเสิร์ฟ','เสิร์ฟเรียบร้อย'])await ticket.getByRole('button',{name,exact:true}).click();
+ await second.goto(url);await addAndSend(second,1);await page.getByRole('button',{name:'รีเฟรชข้อมูล'}).click();await expect(ticket).toHaveCount(1);await expect(ticket).toContainText('รอบ 2');await expect(ticket).not.toContainText('ข้าวกะเพราเนื้อไข่ดาว');
+ await customer.getByRole('button',{name:'ออเดอร์ของโต๊ะ'}).click();await expect(customer.locator('.guest-round')).toHaveCount(2);await expect(customer.locator('.guest-round').first()).toContainText('เสิร์ฟแล้ว');await customer.screenshot({path:'/private/tmp/pos-food-customer-orders.png',fullPage:false,animations:'disabled'});
+ await page.locator('nav').getByRole('button',{name:'จัดการโต๊ะ',exact:true}).click();await page.locator('.table-card').filter({hasText:'T13'}).click();await expect(page.getByRole('dialog')).toContainText('ลูกค้าสั่งผ่าน QR');await page.getByRole('button',{name:'เปิดบิล / รับชำระเงิน'}).click();await page.getByRole('button',{name:'ชำระเงินจำลอง',exact:true}).click();await page.getByRole('button',{name:'QR จำลอง',exact:true}).click();await page.getByRole('button',{name:'ยืนยันชำระเงินจำลอง'}).click();await expect(page.getByRole('dialog',{name:'ใบเสร็จรับเงิน'})).toBeVisible();
+ await customer.reload();await expect(customer.getByText('รอบบริการสิ้นสุดแล้ว',{exact:true})).toBeVisible();await expect(customer.locator('.guest-menu-card')).toHaveCount(0);expect(errors).toEqual([]);await c1.close();await c2.close();
+});
+
+test('lost response retries same request without duplicating kitchen items',async({page,browser})=>{
+ await login(page);const url=await qr(page,'T12');const context=await browser.newContext({viewport:{width:390,height:844}}),guest=await context.newPage();await guest.goto(url);await expect(guest.locator('.guest-menu-card')).toHaveCount(30);
+ let first=true,blockRead=true;const keys:string[]=[];
+ await guest.route('**/api/guest/**',async route=>{const req=route.request();if(req.method()==='GET'&&blockRead)return route.abort('failed');if(req.method()==='POST'){keys.push(req.postDataJSON().requestId);if(first){first=false;await route.fetch();return route.abort('failed');}}return route.continue();});
+ await guest.locator('.guest-menu-card').first().click();await guest.getByRole('button',{name:'เพิ่มในตะกร้า'}).click();await guest.locator('.guest-cart-bar button').click();await guest.getByRole('button',{name:'ยืนยันส่งเข้าครัว'}).click();await expect(guest.getByRole('button',{name:'ลองส่งรายการเดิมอีกครั้ง'})).toBeEnabled();blockRead=false;await guest.getByRole('button',{name:'ลองส่งรายการเดิมอีกครั้ง'}).click();await expect(guest.locator('.guest-round')).toHaveCount(1);await expect(guest.locator('.guest-ordered-item')).toHaveCount(1);expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);await guest.reload();await expect(guest.locator('.guest-cart-bar')).toHaveCount(0);await context.close();
+});
