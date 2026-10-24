@@ -61,7 +61,7 @@ Medium / Enterprise มีหน้า **QR สั่งอาหาร** ให
 
 ## เปิดออนไลน์จาก GitHub
 
-เตรียม `render.yaml` สำหรับรันทั้งระบบพร้อม persistent disk และ `.github/workflows/static.yml` สำหรับ frontend บน GitHub Pages ที่เชื่อม API แยกไว้แล้ว ดู [คู่มือ Deploy ทีละขั้นตอน](docs/DEPLOYMENT.md) ต้องเชื่อมบัญชี Render และกำหนด `VITE_API_BASE_URL` ใน GitHub ก่อนใช้ Pages
+เตรียม `render.yaml` สำหรับรันทั้งระบบพร้อม persistent disk และ `.github/workflows/static.yml` สำหรับ frontend บน GitHub Pages ที่เชื่อม API แยกไว้แล้ว ดู [คู่มือ Deploy ทีละขั้นตอน](docs/DEPLOYMENT.md) Pages เผยแพร่หน้าตั้งค่าได้ก่อน ส่วนการใช้งาน POS ต้องเปิด Backend บน Render และกำหนด `VITE_API_BASE_URL` ใน GitHub
 
 ## ข้อมูลและการจัดเก็บ
 

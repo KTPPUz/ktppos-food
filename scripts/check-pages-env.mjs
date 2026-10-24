@@ -1,6 +1,7 @@
 const value=process.env.VITE_API_BASE_URL;
-try {
-  if(!value)throw new Error('missing');
+if(!value){
+  console.log('::notice::VITE_API_BASE_URL is not configured. Publishing the backend setup page; POS and QR ordering remain unavailable until the backend is connected.');
+} else try {
   const url=new URL(value);
   if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||!url.pathname.replace(/\/$/,'').endsWith('/api'))throw new Error('invalid');
   if(['localhost','127.0.0.1','[::1]'].includes(url.hostname))throw new Error('local');

@@ -70,7 +70,7 @@ Render มี `RENDER_EXTERNAL_URL` ให้โดยอัตโนมัต�
 
 ## B. เปิดหน้าเว็บผ่าน `github.io`
 
-ทำวิธี A ให้ Backend Live ก่อน แล้วตั้งค่าเพิ่มตามนี้
+เผยแพร่หน้าเว็บได้แม้ยังไม่มี Backend โดยจะแสดงหน้าตั้งค่าที่ระบุว่ายังใช้งาน POS/รับออเดอร์ไม่ได้ เมื่อต้องการเปิดใช้งานจริง ให้ทำวิธี A ให้ Backend Live แล้วตั้งค่าเพิ่มตามนี้
 
 ### 1. ตั้ง URL API ใน GitHub
 
@@ -103,7 +103,7 @@ API ตรวจ CORS เฉพาะ origin ที่อนุญาต พร�
 
 Workflow จะตรวจ `VITE_API_BASE_URL`, ติดตั้ง Node/dependencies, รัน API tests, build ด้วย base path ที่ GitHub Pages รายงาน, upload เฉพาะ `dist` แล้ว deploy ไม่อัปโหลดทั้ง repository ตาม template static เดิม [Vite deployment](https://v6.vite.dev/guide/static-deploy#github-pages)
 
-ถ้าไม่ได้ตั้ง URL API workflow จะหยุดพร้อมข้อความที่ระบุให้ตั้งตัวแปร แทนเผยแพร่หน้าที่ login หรือสั่งอาหารไม่ได้
+ถ้ายังไม่ได้ตั้ง URL API workflow จะเผยแพร่หน้าตั้งค่า Backend โดยไม่เรียก API ที่ไม่มีอยู่ เมื่อใส่ URL จริงแล้ว Run workflow อีกครั้งจะได้หน้าเข้าสู่ระบบตามปกติ หากใส่ URL ผิดรูปแบบ เช่น ไม่ใช่ HTTPS หรือไม่ลงท้าย /api workflow ยังหยุดเพื่อให้แก้ค่า
 
 ### 4. เปิดเว็บและออก QR ใหม่
 
@@ -137,6 +137,7 @@ https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 | CUSTOMER_BASE_URL | Server startup | URL frontend สำหรับ QR แบบกำหนดเอง รวม repository path ได้ |
 | RENDER_EXTERNAL_URL | Render กำหนดให้ | URL สาธารณะของบริการ เมื่อไม่ได้ตั้ง CUSTOMER_BASE_URL |
 | VITE_API_BASE_URL | Frontend build | API prefix เช่น `https://service.onrender.com/api`; ไม่ตั้งจะใช้ `/api` ในโดเมนเดิม |
+| VITE_DEPLOY_TARGET | Frontend build | workflow กำหนดเป็น pages เพื่อแสดงหน้าตั้งค่าเมื่อยังไม่มี API; ไม่ใช้กับ local/Render |
 | VITE_BASE_PATH | Frontend build | `/` สำหรับ Render หรือ `/ktppos-food/` สำหรับ Pages; workflow คำนวณให้ |
 
 ดูตัวอย่างที่ `.env.example` สำหรับ local frontend สามารถสร้าง `.env.local` ให้ Vite อ่าน `VITE_` ได้ ส่วนค่าของ Node server ให้ export ใน shell หรือกำหนดใน Environment ของโฮสต์ ไฟล์ `.env.example` ไม่ถูกโหลดเข้า Node process เอง
@@ -163,7 +164,7 @@ https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 | QR เปิดหน้า login แทนเมนู | QR ของ Pages ต้องมี `#/order/` และใช้ frontend build รุ่นใหม่ |
 | QR ชี้ localhost หรือ IP ภายในโฮสต์ | เปิดจาก HTTPS URL จริง ตั้ง CUSTOMER_BASE_URL หรือใช้ RENDER_EXTERNAL_URL |
 | ข้อมูลหายหลัง restart | DATA_DIR ต้องอยู่ใน persistent disk และรัน instance เดียว |
-| Workflow หยุดที่ Check backend URL | ตั้ง repository variable VITE_API_BASE_URL ใน Actions Variables |
+| Workflow เก่าหยุดที่ Check backend URL | Push workflow รุ่นใหม่แล้ว Run workflow ใหม่; รุ่นใหม่เผยแพร่หน้าตั้งค่าได้เมื่อยังไม่มี API |
 | QR เก่าหมดอายุ / ส่งรายการไม่ได้หลัง restart | ดูอายุ/สถานะรอบบริการ; QR ต้องเป็นรอบที่ยังเปิดและกะขายยังเปิด |
 
 ## สิ่งที่ตรวจจากเครื่องพัฒนา

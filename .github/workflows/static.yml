@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Check backend URL
+      - name: Check backend configuration
         run: node scripts/check-pages-env.mjs
       - uses: actions/configure-pages@v5
         id: pages
@@ -36,6 +36,7 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+          VITE_DEPLOY_TARGET: pages
       - name: Upload built files
         uses: actions/upload-pages-artifact@v3
         with:

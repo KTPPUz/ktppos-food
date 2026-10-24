@@ -1,5 +1,6 @@
 import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import {createApp} from '../server/app.mjs';
 import {serverOptions} from '../server/http.mjs';
 import {customerOrderUrl,customerOrderToken,apiEndpoint} from '../shared/deployment.mjs';
@@ -44,4 +45,11 @@ test('server public QR URL prefers explicit configuration, then Render URL, and 
  assert.deepEqual(serverOptions({CUSTOMER_BASE_URL:'https://ktppuz.github.io/ktppos-food/',RENDER_EXTERNAL_URL:'https://ktp.onrender.com'}).customerBaseUrls,['https://ktppuz.github.io/ktppos-food']);
  assert.deepEqual(serverOptions({HOST:'127.0.0.1'},['http://10.0.0.1:5173']).customerBaseUrls,['http://localhost:5173']);
  assert.throws(()=>serverOptions({PORT:'bad'}));assert.throws(()=>serverOptions({CUSTOMER_BASE_URL:'javascript:alert(1)'}));
+});
+
+test('Pages deployment without an API publishes setup, while malformed URLs still fail validation',()=>{
+ const check=value=>spawnSync(process.execPath,['scripts/check-pages-env.mjs'],{env:{...process.env,VITE_API_BASE_URL:value},encoding:'utf8'});
+ const missing=check('');assert.equal(missing.status,0);assert.match(missing.stdout,/Publishing the backend setup page/);
+ assert.equal(check('https://api.example.com/api').status,0);
+ for(const value of ['http://localhost:5173/api','not-a-url','https://api.example.com'])assert.equal(check(value).status,1);
 });

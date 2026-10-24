@@ -4,15 +4,17 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-let staticServer:any,output:string;
+let staticServer:any,output:string,setupOutput:string;
 const frontend='http://127.0.0.1:5190/ktppos-food/';
 test.beforeAll(async()=>{
  output=fs.mkdtempSync(path.join(os.tmpdir(),'ktp-pages-'));
- execFileSync(process.execPath,[path.resolve('node_modules/vite/bin/vite.js'),'build','--outDir',output],{env:{...process.env,VITE_BASE_PATH:'/ktppos-food/',VITE_API_BASE_URL:'http://127.0.0.1:5188/api'},stdio:'pipe'});
- const app=express();app.use('/ktppos-food',express.static(output));app.use((_,res)=>res.sendStatus(404));
+ execFileSync(process.execPath,[path.resolve('node_modules/vite/bin/vite.js'),'build','--outDir',output],{env:{...process.env,VITE_BASE_PATH:'/ktppos-food/',VITE_DEPLOY_TARGET:'pages',VITE_API_BASE_URL:'http://127.0.0.1:5188/api'},stdio:'pipe'});
+ setupOutput=fs.mkdtempSync(path.join(os.tmpdir(),'ktp-pages-setup-'));
+ execFileSync(process.execPath,[path.resolve('node_modules/vite/bin/vite.js'),'build','--outDir',setupOutput],{env:{...process.env,VITE_BASE_PATH:'/setup-demo/',VITE_DEPLOY_TARGET:'pages',VITE_API_BASE_URL:''},stdio:'pipe'});
+ const app=express();app.use('/ktppos-food',express.static(output));app.use('/setup-demo',express.static(setupOutput));app.use((_,res)=>res.sendStatus(404));
  staticServer=app.listen(5190,'127.0.0.1');await new Promise<void>((resolve,reject)=>{staticServer.once('listening',resolve);staticServer.once('error',reject);});
 });
-test.afterAll(async()=>{if(staticServer)await new Promise<void>(resolve=>staticServer.close(()=>resolve()));if(output)fs.rmSync(output,{recursive:true,force:true});});
+test.afterAll(async()=>{if(staticServer)await new Promise<void>(resolve=>staticServer.close(()=>resolve()));if(output)fs.rmSync(output,{recursive:true,force:true});if(setupOutput)fs.rmSync(setupOutput,{recursive:true,force:true});});
 
 test('built Pages frontend logs in across origins and QR hash route survives reload on static hosting',async({page,browser})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
@@ -31,4 +33,13 @@ test('built Pages frontend logs in across origins and QR hash route survives rel
  await page.getByRole('button',{name:'เสร็จสิ้น'}).click();await page.locator('nav').getByRole('button',{name:'QR สั่งอาหาร',exact:true}).click();await page.locator('.qr-table-card').filter({hasText:'โต๊ะ T15'}).getByRole('button').click();const nextUrl=await page.locator('#customer-qr-link').inputValue();expect(nextUrl).not.toBe(url);
  await guest.evaluate(hash=>{window.location.hash=hash;},new URL(nextUrl).hash);await expect(guest.locator('.guest-menu-card')).toHaveCount(30);await expect(guest.getByText('รอบบริการสิ้นสุดแล้ว',{exact:true})).toHaveCount(0);
  expect(errors).toEqual([]);await guestContext.close();
+});
+
+test('Pages without backend publishes an explicit setup screen without calling missing APIs',async({page})=>{
+ const apiRequests:string[]=[];page.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))apiRequests.push(r.url());});
+ const response=await page.goto('http://127.0.0.1:5190/setup-demo/');expect(response?.status()).toBe(200);
+ await expect(page.getByRole('heading',{name:'หน้าเว็บพร้อมแล้ว.'})).toBeVisible();await expect(page.getByText('ยังไม่ได้เชื่อมต่อ Backend',{exact:true})).toBeVisible();
+ await expect(page.locator('#account')).toHaveCount(0);await expect(page.getByRole('link',{name:'เปิดคู่มือตั้งค่า'})).toHaveAttribute('href','https://github.com/KTPPUz/ktppos-food/blob/main/docs/DEPLOYMENT.md');
+ await page.reload();await expect(page.getByText('เผยแพร่หน้าเว็บแล้ว',{exact:true})).toBeVisible();expect(apiRequests).toEqual([]);
+ await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
 });
