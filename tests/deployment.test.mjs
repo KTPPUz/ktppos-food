@@ -47,9 +47,9 @@ test('server public QR URL prefers explicit configuration, then Render URL, and 
  assert.throws(()=>serverOptions({PORT:'bad'}));assert.throws(()=>serverOptions({CUSTOMER_BASE_URL:'javascript:alert(1)'}));
 });
 
-test('Pages deployment without an API publishes setup, while malformed URLs still fail validation',()=>{
+test('Pages deployment without an API publishes mockup, while malformed URLs still fail validation',()=>{
  const check=value=>spawnSync(process.execPath,['scripts/check-pages-env.mjs'],{env:{...process.env,VITE_API_BASE_URL:value},encoding:'utf8'});
- const missing=check('');assert.equal(missing.status,0);assert.match(missing.stdout,/Publishing the backend setup page/);
+ const missing=check('');assert.equal(missing.status,0);assert.match(missing.stdout,/Publishing browser-only mockup mode/);
  assert.equal(check('https://api.example.com/api').status,0);
  for(const value of ['http://localhost:5173/api','not-a-url','https://api.example.com'])assert.equal(check(value).status,1);
 });

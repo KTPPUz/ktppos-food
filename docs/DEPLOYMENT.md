@@ -1,13 +1,14 @@
 # เปิด KTP Table ออนไลน์จาก GitHub
 
-เอกสารนี้ใช้ repository `KTPPUz/ktppos-food` เป็นตัวอย่าง มีสองวิธีที่ใช้โค้ดชุดเดียวกันได้:
+เอกสารนี้ใช้ repository `KTPPUz/ktppos-food` เป็นตัวอย่าง มีสามวิธีที่ใช้โค้ดชุดเดียวกันได้:
 
 | วิธี | URL ที่ใช้ | ส่วนที่โฮสต์ |
 | --- | --- | --- |
+| Mockup บน GitHub Pages | `https://ktppuz.github.io/ktppos-food/` | หน้าเว็บและข้อมูลจำลองในเบราว์เซอร์ ไม่ต้องมี Backend |
 | A. Render ทั้งระบบ | `https://ชื่อบริการ.onrender.com` | React และ Express API ในบริการเดียว |
 | B. GitHub Pages + Render API | `https://ktppuz.github.io/ktppos-food/` | Pages ให้บริการหน้าเว็บ; Render รัน API และเก็บข้อมูล |
 
-GitHub Pages ไม่รัน Node.js API ดังนั้นการตั้ง Pages อย่างเดียวยังรับออเดอร์ไม่ได้ ต้องเปิด Backend ก่อน [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
+GitHub Pages ไม่รัน Node.js API แต่โหมด Mockup ทดลองออเดอร์ในเบราว์เซอร์ได้ หากต้องการให้ออเดอร์จากหลายเครื่องเข้าครัวเดียวกันต้องเปิด Backend ก่อน [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
 
 ## ก่อนเริ่ม
 
@@ -16,7 +17,19 @@ GitHub Pages ไม่รัน Node.js API ดังนั้นการตั
 3. ไม่ push `.data`, `.env.local`, token หรือข้อมูลร้านจริง; `.gitignore` กันไฟล์ข้อมูล/ค่า environment ไว้แล้ว
 4. ระบบนี้ยังเป็น Demo ที่มีบัญชีสาธิต PIN 1234 ใช้ข้อมูลตัวอย่างสำหรับทดลอง ก่อนเปิดให้ใช้งานธุรกิจจริงต้องพัฒนา identity และ database ตาม [DATABASE-SPEC.md](DATABASE-SPEC.md)
 
-เอกสารและไฟล์เหล่านี้เตรียมสำหรับ deploy ยังไม่ได้สร้างบริการ Render หรือเปิด Pages ในบัญชี GitHub ให้โดยอัตโนมัติ
+การสร้างบริการ Render ต้องทำผ่านบัญชีของคุณ ส่วน GitHub Pages deploy อัตโนมัติเมื่อ push เข้า main และตั้ง Pages Source เป็น GitHub Actions
+
+## ดู Mockup โดยไม่ต้องเปิด Backend
+
+1. ตั้ง Settings → Pages → Source เป็น **GitHub Actions**
+2. ไม่ต้องตั้ง `VITE_API_BASE_URL` (ถ้ามีค่าเก่า ให้ลบออก) แล้ว push main หรือ Run workflow
+3. เปิด URL Pages เลือก Small/Medium/Enterprise และบัญชีที่ต้องการ PIN ทุกบัญชีคือ **1234**
+4. ทดลองเลือกเมนู ส่งครัว เปลี่ยนสถานะ ชำระเงิน และดูรายงานได้
+5. ข้อมูลอยู่ใน localStorage ของ origin นี้ รีเฟรชแล้วยังอยู่ กด **รีเซ็ตข้อมูล** เพื่อกลับเป็นข้อมูลตัวอย่างและออกจากบัญชี
+
+แถบ **โหมด Demo** แสดงบนทุกหน้า ข้อมูลไม่เชื่อมข้ามเครื่องหรือข้าม browser profile การสาธิต QR ให้เปิดลิงก์ในแท็บใหม่ของเบราว์เซอร์เดียวกัน โหมดนี้ใช้กติกา POS ชุดเดียวกับ Node ผ่านตัวจำลอง API ในเครื่อง ไม่ส่ง API request ไป Backend และใช้ชุดข้อมูลแยกจาก `.data/demo.json` การล้าง site data จะลบข้อมูลจำลองด้วย หาก browser ไม่อนุญาตพื้นที่จัดเก็บจะแสดงข้อผิดพลาด
+
+เมื่อต้องการทดลองร่วมกันหลายเครื่อง ให้ทำวิธี A/B ด้านล่าง การตั้ง URL API จริงแล้ว build ใหม่จะเปลี่ยนไปใช้ Backend โดยไม่ย้ายข้อมูล Mockup ขึ้นเซิร์ฟเวอร์
 
 ## A. เปิดทั้งระบบบน Render
 
@@ -70,7 +83,7 @@ Render มี `RENDER_EXTERNAL_URL` ให้โดยอัตโนมัต�
 
 ## B. เปิดหน้าเว็บผ่าน `github.io`
 
-เผยแพร่หน้าเว็บได้แม้ยังไม่มี Backend โดยจะแสดงหน้าตั้งค่าที่ระบุว่ายังใช้งาน POS/รับออเดอร์ไม่ได้ เมื่อต้องการเปิดใช้งานจริง ให้ทำวิธี A ให้ Backend Live แล้วตั้งค่าเพิ่มตามนี้
+เผยแพร่ Mockup ได้แม้ยังไม่มี Backend ตามขั้นตอนด้านบน เมื่อต้องการเชื่อมข้อมูลระหว่างเครื่อง ให้ทำวิธี A ให้ Backend Live แล้วตั้งค่าเพิ่มตามนี้
 
 ### 1. ตั้ง URL API ใน GitHub
 
@@ -103,7 +116,7 @@ API ตรวจ CORS เฉพาะ origin ที่อนุญาต พร�
 
 Workflow จะตรวจ `VITE_API_BASE_URL`, ติดตั้ง Node/dependencies, รัน API tests, build ด้วย base path ที่ GitHub Pages รายงาน, upload เฉพาะ `dist` แล้ว deploy ไม่อัปโหลดทั้ง repository ตาม template static เดิม [Vite deployment](https://v6.vite.dev/guide/static-deploy#github-pages)
 
-ถ้ายังไม่ได้ตั้ง URL API workflow จะเผยแพร่หน้าตั้งค่า Backend โดยไม่เรียก API ที่ไม่มีอยู่ เมื่อใส่ URL จริงแล้ว Run workflow อีกครั้งจะได้หน้าเข้าสู่ระบบตามปกติ หากใส่ URL ผิดรูปแบบ เช่น ไม่ใช่ HTTPS หรือไม่ลงท้าย /api workflow ยังหยุดเพื่อให้แก้ค่า
+ถ้ายังไม่ได้ตั้ง URL API workflow จะเผยแพร่โหมด Mockup ที่เก็บข้อมูลในเบราว์เซอร์ เมื่อใส่ URL จริงแล้ว Run workflow อีกครั้งจะใช้ข้อมูลจาก Backend หากใส่ URL ผิดรูปแบบ เช่น ไม่ใช่ HTTPS หรือไม่ลงท้าย /api workflow ยังหยุดเพื่อให้แก้ค่า
 
 ### 4. เปิดเว็บและออก QR ใหม่
 
@@ -121,7 +134,7 @@ https://ktppuz.github.io/ktppos-food/
 https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 ```
 
-ส่วน `#/order/...` ไม่ถูกส่งไปขอไฟล์จาก Pages จึงเปิดจาก QR และรีเฟรชได้โดยไม่ต้องสร้างไฟล์ `/order/TOKEN` หรือ 404 rewrite ข้อมูลเมนูและการสั่งยังเรียก Render API ที่ตั้งไว้
+ส่วน `#/order/...` ไม่ถูกส่งไปขอไฟล์จาก Pages จึงเปิดจาก QR และรีเฟรชได้โดยไม่ต้องสร้างไฟล์ `/order/TOKEN` หรือ 404 rewrite หากตั้ง API แล้ว ข้อมูลเมนูและการสั่งจะเรียก Render API; หากไม่ตั้ง จะใช้ข้อมูลจำลองในเบราว์เซอร์
 
 ลิงก์เดิม `/order/TOKEN` ยังใช้กับ Node/Render ที่มี SPA fallback ได้ แต่ลิงก์ GitHub Pages ควรออกใหม่เป็นแบบ hash และมี path repository ครบ
 
@@ -137,14 +150,14 @@ https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 | CUSTOMER_BASE_URL | Server startup | URL frontend สำหรับ QR แบบกำหนดเอง รวม repository path ได้ |
 | RENDER_EXTERNAL_URL | Render กำหนดให้ | URL สาธารณะของบริการ เมื่อไม่ได้ตั้ง CUSTOMER_BASE_URL |
 | VITE_API_BASE_URL | Frontend build | API prefix เช่น `https://service.onrender.com/api`; ไม่ตั้งจะใช้ `/api` ในโดเมนเดิม |
-| VITE_DEPLOY_TARGET | Frontend build | workflow กำหนดเป็น pages เพื่อแสดงหน้าตั้งค่าเมื่อยังไม่มี API; ไม่ใช้กับ local/Render |
+| VITE_DEPLOY_TARGET | Frontend build | workflow กำหนดเป็น pages เพื่อเปิดโหมด Mockup เมื่อยังไม่มี API; ไม่ใช้กับ local/Render |
 | VITE_BASE_PATH | Frontend build | `/` สำหรับ Render หรือ `/ktppos-food/` สำหรับ Pages; workflow คำนวณให้ |
 
 ดูตัวอย่างที่ `.env.example` สำหรับ local frontend สามารถสร้าง `.env.local` ให้ Vite อ่าน `VITE_` ได้ ส่วนค่าของ Node server ให้ export ใน shell หรือกำหนดใน Environment ของโฮสต์ ไฟล์ `.env.example` ไม่ถูกโหลดเข้า Node process เอง
 
 เปลี่ยน `VITE_` แล้วต้อง build/deploy frontend ใหม่ เปลี่ยน server variables แล้วต้อง restart/redeploy Backend ด้วย
 
-## ตรวจหลัง deploy
+## ตรวจหลัง deploy แบบเชื่อม Backend
 
 1. เปิด Backend `/healthz` ได้ 200 และ JSON status ok
 2. เปิดหน้า login แล้วมีบัญชี Demo ใน dropdown ไม่มีข้อผิดพลาด fetch/CORS
@@ -164,7 +177,7 @@ https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 | QR เปิดหน้า login แทนเมนู | QR ของ Pages ต้องมี `#/order/` และใช้ frontend build รุ่นใหม่ |
 | QR ชี้ localhost หรือ IP ภายในโฮสต์ | เปิดจาก HTTPS URL จริง ตั้ง CUSTOMER_BASE_URL หรือใช้ RENDER_EXTERNAL_URL |
 | ข้อมูลหายหลัง restart | DATA_DIR ต้องอยู่ใน persistent disk และรัน instance เดียว |
-| Workflow เก่าหยุดที่ Check backend URL | Push workflow รุ่นใหม่แล้ว Run workflow ใหม่; รุ่นใหม่เผยแพร่หน้าตั้งค่าได้เมื่อยังไม่มี API |
+| Workflow เก่าหยุดที่ Check backend URL | Push workflow รุ่นใหม่แล้ว Run workflow ใหม่; รุ่นใหม่เผยแพร่ Mockup ได้เมื่อยังไม่มี API |
 | QR เก่าหมดอายุ / ส่งรายการไม่ได้หลัง restart | ดูอายุ/สถานะรอบบริการ; QR ต้องเป็นรอบที่ยังเปิดและกะขายยังเปิด |
 
 ## สิ่งที่ตรวจจากเครื่องพัฒนา
@@ -172,4 +185,5 @@ https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 - API tests: health, proxy HTTPS, CORS/preflight, authentication และฟังก์ชันขายเดิม
 - Chrome: build หน้าเว็บแบบ `/ktppos-food/` บน static server ที่ไม่มี SPA fallback แล้วแยก API เป็นอีก origin จริง
 - ทดสอบ login, QR/hash route, reload, สั่งเข้าครัว และชำระเงินในสภาพแวดล้อมแยกดังกล่าว
-- การผ่าน local tests ไม่ใช่การยืนยันว่า GitHub Actions หรือ Render deploy ในบัญชีจริงสำเร็จ ต้องตรวจผล deploy หลังเชื่อมบัญชีและ push เอง
+- Chrome: static build ที่ไม่มี API สามารถ login → ส่งครัว → ชำระเงิน → reload → ทดลอง QR ในอีกแท็บ และรีเซ็ต โดยไม่มี API request
+- ตรวจผล deploy ล่าสุดใน GitHub Actions และเปิด URL สาธารณะหลัง push ทุกครั้ง

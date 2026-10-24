@@ -35,11 +35,32 @@ test('built Pages frontend logs in across origins and QR hash route survives rel
  expect(errors).toEqual([]);await guestContext.close();
 });
 
-test('Pages without backend publishes an explicit setup screen without calling missing APIs',async({page})=>{
- const apiRequests:string[]=[];page.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))apiRequests.push(r.url());});
- const response=await page.goto('http://127.0.0.1:5190/setup-demo/');expect(response?.status()).toBe(200);
- await expect(page.getByRole('heading',{name:'หน้าเว็บพร้อมแล้ว.'})).toBeVisible();await expect(page.getByText('ยังไม่ได้เชื่อมต่อ Backend',{exact:true})).toBeVisible();
- await expect(page.locator('#account')).toHaveCount(0);await expect(page.getByRole('link',{name:'เปิดคู่มือตั้งค่า'})).toHaveAttribute('href','https://github.com/KTPPUz/ktppos-food/blob/main/docs/DEPLOYMENT.md');
- await page.reload();await expect(page.getByText('เผยแพร่หน้าเว็บแล้ว',{exact:true})).toBeVisible();expect(apiRequests).toEqual([]);
- await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+test('Pages mockup runs POS and QR locally, persists, resets and makes no API requests',async({page,context,browser})=>{
+ const apiRequests:string[]=[],errors:string[]=[];
+ page.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))apiRequests.push(r.url());});page.on('pageerror',e=>errors.push(e.message));
+ const frontend='http://127.0.0.1:5190/setup-demo/';
+ expect((await page.goto(frontend))?.status()).toBe(200);
+ await expect(page.getByRole('complementary',{name:'โหมดทดลอง'})).toContainText('ไม่เชื่อมออเดอร์ข้ามเครื่อง');
+ await page.getByRole('button',{name:'เข้าสู่ร้านของคุณ'}).click();await expect(page.locator('.sidebar')).toBeVisible();
+ await page.getByRole('combobox',{name:'เลือกโต๊ะ',exact:true}).selectOption('r1-t14');
+ await page.locator('.product-card').first().click();await page.getByRole('button',{name:'เพิ่มในออเดอร์'}).click();await page.getByRole('button',{name:'ส่งเข้าครัว'}).click();
+ await page.locator('nav').getByRole('button',{name:'หน้าจอครัว'}).click();const ticket=page.locator('.kitchen-ticket').filter({hasText:'T14'});
+ for(const name of ['เริ่มทำอาหาร','พร้อมเสิร์ฟ','เสิร์ฟเรียบร้อย'])await ticket.getByRole('button',{name,exact:true}).click();
+ await page.reload();await expect(page.locator('.sidebar')).toBeVisible();
+ await page.locator('nav').getByRole('button',{name:'จัดการโต๊ะ',exact:true}).click();await page.locator('.table-card').filter({hasText:'T14'}).click();await page.getByRole('button',{name:'เปิดบิล / รับชำระเงิน'}).click();await page.getByRole('button',{name:'ชำระเงินจำลอง',exact:true}).click();await page.getByRole('button',{name:'QR จำลอง',exact:true}).click();await page.getByRole('button',{name:'ยืนยันชำระเงินจำลอง'}).click();await expect(page.getByRole('dialog',{name:'ใบเสร็จรับเงิน'})).toBeVisible();await page.getByRole('button',{name:'เสร็จสิ้น'}).click();
+ await page.locator('nav').getByRole('button',{name:'QR สั่งอาหาร',exact:true}).click();await page.locator('.qr-table-card').filter({hasText:'โต๊ะ T15'}).getByRole('button').click();const qr=await page.locator('#customer-qr-link').inputValue();expect(qr).toContain('/setup-demo/#/order/');
+ const guest=await context.newPage();guest.on('pageerror',e=>errors.push(e.message));guest.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))apiRequests.push(r.url());});await guest.goto(qr);await expect(guest.locator('.guest-menu-card')).toHaveCount(30);await guest.locator('.guest-menu-card').first().click();await guest.getByRole('button',{name:'เพิ่มในตะกร้า'}).click();await guest.locator('.guest-cart-bar button').click();await guest.getByRole('button',{name:'ยืนยันส่งเข้าครัว'}).click();await expect(guest.locator('.guest-round')).toHaveCount(1);await guest.reload();await guest.getByRole('button',{name:'ออเดอร์ของโต๊ะ',exact:false}).click();await expect(guest.locator('.guest-round')).toHaveCount(1);
+ await page.getByRole('button',{name:'ปิด',exact:true}).click();await page.getByRole('button',{name:'รีเฟรชข้อมูล'}).click();await page.locator('nav').getByRole('button',{name:'หน้าจอครัว'}).click();await expect(page.locator('.kitchen-ticket').filter({hasText:'T15'})).toContainText('ลูกค้าสั่งผ่าน QR');
+ const other=await browser.newContext();const isolated=await other.newPage();await isolated.goto(qr);await expect(isolated.locator('.guest-menu-card')).toHaveCount(0);await expect(isolated.getByRole('complementary',{name:'โหมดทดลอง'})).toBeVisible();await other.close();
+ // Cancellation keeps the sample order; confirmation starts a new dataset.
+ page.once('dialog',d=>d.dismiss());await page.getByRole('button',{name:'รีเซ็ตข้อมูล',exact:true}).click();await expect(page.locator('.sidebar')).toBeVisible();
+ page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'รีเซ็ตข้อมูล',exact:true}).click();await expect(page.locator('#account')).toBeVisible();await page.getByRole('button',{name:'เข้าสู่ร้านของคุณ'}).click();await expect(page.locator('.sidebar')).toBeVisible();await page.locator('nav').getByRole('button',{name:'จัดการโต๊ะ',exact:true}).click();await expect(page.locator('.table-card').filter({hasText:'T15'})).toContainText('พร้อมรับลูกค้า');
+ await page.screenshot({path:'/private/tmp/ktp-mockup-desktop.png'});expect(apiRequests).toEqual([]);expect(errors).toEqual([]);await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.screenshot({path:'/private/tmp/ktp-mockup-mobile.png',animations:'disabled'});await guest.close();
+});
+
+test('Pages mockup explains unavailable browser storage',async({page})=>{
+ await page.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('Storage blocked','QuotaExceededError');};});
+ await page.goto('http://127.0.0.1:5190/setup-demo/');
+ await expect(page.locator('.error')).toContainText('อนุญาตพื้นที่จัดเก็บ');
+ await expect(page.getByRole('complementary',{name:'โหมดทดลอง'})).toBeVisible();
 });

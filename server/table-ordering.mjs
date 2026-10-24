@@ -1,11 +1,10 @@
-import crypto from 'node:crypto';
 import {menuPrice} from '../shared/pricing.mjs';
 import {assert,totals,scope,requireOpen} from './domain.mjs';
 const terminal = new Set(['paid','refunded','cancelled','merged','split']);
 const tokenPattern = /^[a-f0-9]{48}$/;
 
 // A QR is a capability for one service round, never a staff login.
-export function createTableOrdering({data,catalog,parseItems,allowed,feature,audit,persist,now,uid,getOrder}) {
+export function createTableOrdering({randomToken,fingerprint,data,catalog,parseItems,allowed,feature,audit,persist,now,uid,getOrder}) {
   data.tableSessions ??= [];
   const isActive = s => s.status === 'active' && Date.parse(s.expiresAt) > Date.now();
   const orderSessions = order => data.tableSessions.filter(s => s.orderIds.includes(order.id));
@@ -99,7 +98,7 @@ export function createTableOrdering({data,catalog,parseItems,allowed,feature,aud
       assert(req.body.items.every(i=>i&&typeof i==='object'&&!Array.isArray(i)&&(i.modifiers===undefined||Array.isArray(i.modifiers))&&(i.modifiers||[]).every(m=>m&&typeof m==='object')),'ข้อมูลรายการอาหารไม่ถูกต้อง');
       const normalized=req.body.items.map(i=>({menuId:i?.menuId,qty:i?.qty,note:String(i?.note||'').slice(0,300),modifiers:(Array.isArray(i?.modifiers)?i.modifiers:[]).map(m=>({group:m.group,name:m.name}))}));
       assert(normalized.every(i=>Number.isInteger(i.qty)&&i.qty>0&&i.qty<=20)&&normalized.reduce((s,i)=>s+i.qty,0)<=50,'สั่งได้ไม่เกิน 20 ต่อรายการ และ 50 จานต่อรอบ');
-      const hash=crypto.createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
+      const hash=fingerprint(JSON.stringify(normalized));
       s.submissions??=[];const existing=s.submissions.find(x=>x.key===key);
       if(existing){assert(existing.hash===hash,'รหัสคำขอนี้ถูกใช้กับรายการอื่นแล้ว',409);return res.json({orderId:existing.orderId,batchId:existing.batchId,duplicate:true,...guestState(s),categories});}
       assert(s.submissions.length<100,'โต๊ะนี้สั่งครบจำนวนรอบที่รองรับแล้ว กรุณาติดต่อพนักงาน',429);
@@ -127,7 +126,7 @@ export function createTableOrdering({data,catalog,parseItems,allowed,feature,aud
         const unsettled=data.tableSessions.find(s=>s.tableId===t.id&&s.status==='active'&&!s.acceptingOrders&&s.orderIds.some(id=>{const o=data.orders.find(o=>o.id===id);return o&&!terminal.has(o.status);}));
         assert(!unsettled,'กรุณาปิดบิลที่แยกไว้ให้ครบก่อนเปิด QR ใหม่',409);
         for(const old of data.tableSessions.filter(s=>s.tableId===t.id&&s.status==='active'))closeSession(old,'QR เดิมหมดอายุและถูกแทนที่แล้ว');
-        s={id:uid(),token:crypto.randomBytes(24).toString('hex'),tenantId:u.tenantId,branchId:t.branchId,tableId:t.id,status:'active',acceptingOrders:true,orderIds:orders.map(o=>o.id),submissions:[],createdAt:now(),createdBy:u.id,expiresAt:new Date(Date.now()+12*3600000).toISOString()};
+        s={id:uid(),token:randomToken(),tenantId:u.tenantId,branchId:t.branchId,tableId:t.id,status:'active',acceptingOrders:true,orderIds:orders.map(o=>o.id),submissions:[],createdAt:now(),createdBy:u.id,expiresAt:new Date(Date.now()+12*3600000).toISOString()};
         for(const o of orders)o.serviceSessionId=s.id;
         data.tableSessions.push(s);audit(u,'เปิด QR สั่งอาหาร',`${t.name} · รอบ ${s.id}`,t.branchId);persist();
       }

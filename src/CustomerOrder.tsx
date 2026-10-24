@@ -2,7 +2,7 @@ import {useState,useEffect,useRef} from 'react';
 import {UtensilsCrossed,Armchair,Search,Plus,Minus,X,ShoppingBag,ArrowRight,CheckCircle2,ChefHat,Clock,Leaf,AlertCircle,RefreshCw,ReceiptText,CheckCheck} from 'lucide-react';
 import type {MenuItem,Item,KitchenBatch,Totals} from './types';
 import {newId} from './ids';
-import {apiUrl} from './runtime';
+import {apiFetch,mockupMode} from './runtime';
 import {menuDiscountLabel} from '../shared/pricing.mjs';
 import './customer.css';
 type GuestMenu=Omit<MenuItem,'overrides'>&{originalPrice:number;discountAmount:number};
@@ -12,7 +12,7 @@ type Pending={requestId:string;items:Item[]};
 const money=(n:number)=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(n);
 const labels:Record<string,string>={draft:'รับรายการแล้ว',pending:'ครัวได้รับแล้ว',cooking:'กำลังปรุง',ready:'พร้อมเสิร์ฟ',served:'เสิร์ฟแล้ว',paid:'ชำระแล้ว',refunded:'คืนเงินแล้ว',cancelled:'ยกเลิก',merged:'รวมบิลแล้ว'};
 function restore<T,>(key:string,fallback:T):T{try{return JSON.parse(sessionStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
-async function request<T,>(token:string,path='',body?:unknown):Promise<T>{const response=await fetch(apiUrl(`/guest/${encodeURIComponent(token)}${path}`),{method:body?'POST':'GET',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});const value=await response.json();if(!response.ok)throw Object.assign(new Error(value.error||'เชื่อมต่อร้านไม่สำเร็จ'),{status:response.status});return value;}
+async function request<T,>(token:string,path='',body?:unknown):Promise<T>{const response=await apiFetch(`/guest/${encodeURIComponent(token)}${path}`,{method:body?'POST':'GET',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});const value=await response.json();if(!response.ok)throw Object.assign(new Error(value.error||'เชื่อมต่อร้านไม่สำเร็จ'),{status:response.status});return value;}
 export default function CustomerOrder({token}:{token:string}){
  const storage=`bt-guest-${token}`,pendingKey=storage+'-pending';
  const [data,setData]=useState<GuestState|null>(null),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(''),[error,setError]=useState(''),[toast,setToast]=useState('');
@@ -41,7 +41,7 @@ export default function CustomerOrder({token}:{token:string}){
  function choose(m:GuestMenu){if(!editable||!m.available)return;setProduct(m);setQty(1);setNote('');setMods(Object.fromEntries(m.modifiers.map(g=>[g.id,g.options[0].name])));}
  function add(){if(!product||!editable)return;const modifiers=product.modifiers.map(g=>({group:g.id,...g.options.find(o=>o.name===mods[g.id])!}));setCart([...cart,{id:newId(),menuId:product.id,name:product.name,qty,note,modifiers,originalUnitPrice:Math.round((product.originalPrice+modifiers.reduce((s,o)=>s+o.price,0))*100)/100,menuDiscount:product.discountAmount,unitPrice:Math.round((product.price+modifiers.reduce((s,o)=>s+o.price,0))*100)/100}]);setProduct(null);setToast('เพิ่มในตะกร้าแล้ว');}
  if(loading)return <div className="guest-loading"><div className="brand-mark"><UtensilsCrossed/></div><h2>กำลังเตรียมเมนูให้คุณ</h2><span className="spinner"/></div>;
- if(!data)return <div className="guest-loading"><AlertCircle size={42}/><h2>ยังเปิดเมนูไม่ได้</h2><p role="alert">{loadError||'QR นี้ไม่ถูกต้อง กรุณาขอ QR ใหม่จากพนักงาน'}</p><button className="primary" onClick={()=>{setLoading(true);refresh();}}><RefreshCw size={16}/> ลองใหม่</button></div>;
+ if(!data)return <div className="guest-loading"><AlertCircle size={42}/><h2>ยังเปิดเมนูไม่ได้</h2><p role="alert">{loadError||'QR นี้ไม่ถูกต้อง กรุณาขอ QR ใหม่จากพนักงาน'}</p>{mockupMode&&<p>โหมด Demo: เปิดลิงก์ QR ในเบราว์เซอร์เดียวกับหน้าร้าน เพื่อใช้ข้อมูลจำลองร่วมกัน</p>}<button className="primary" onClick={()=>{setLoading(true);refresh();}}><RefreshCw size={16}/> ลองใหม่</button></div>;
  const menu=data.menu.filter(m=>(category==='all'||m.category===category)&&`${m.name} ${m.en}`.toLowerCase().includes(search.toLowerCase()));
  const bill=data.orders.filter(o=>!['cancelled','merged','refunded'].includes(o.status)).reduce((s,o)=>s+o.totals.total,0);
  const activeOrders=data.orders.filter(o=>!['cancelled','merged'].includes(o.status));

@@ -61,7 +61,7 @@ Medium / Enterprise มีหน้า **QR สั่งอาหาร** ให
 
 ## เปิดออนไลน์จาก GitHub
 
-เตรียม `render.yaml` สำหรับรันทั้งระบบพร้อม persistent disk และ `.github/workflows/static.yml` สำหรับ frontend บน GitHub Pages ที่เชื่อม API แยกไว้แล้ว ดู [คู่มือ Deploy ทีละขั้นตอน](docs/DEPLOYMENT.md) Pages เผยแพร่หน้าตั้งค่าได้ก่อน ส่วนการใช้งาน POS ต้องเปิด Backend บน Render และกำหนด `VITE_API_BASE_URL` ใน GitHub
+เตรียม `render.yaml` สำหรับรันทั้งระบบพร้อม persistent disk และ `.github/workflows/static.yml` สำหรับ frontend บน GitHub Pages ที่เชื่อม API แยกไว้แล้ว ดู [คู่มือ Deploy ทีละขั้นตอน](docs/DEPLOYMENT.md) Pages ที่ยังไม่ตั้ง `VITE_API_BASE_URL` จะเปิดโหมด Mockup อัตโนมัติ ทดลอง POS/ครัว/ชำระเงินด้วยข้อมูลจำลองในเบราว์เซอร์ พร้อมปุ่มรีเซ็ต ข้อมูลไม่เชื่อมข้ามเครื่อง หากต้องการทดลองหลายเครื่องร่วมกัน ให้เปิด Backend บน Render แล้วกำหนด `VITE_API_BASE_URL` ใน GitHub
 
 ## ข้อมูลและการจัดเก็บ
 
