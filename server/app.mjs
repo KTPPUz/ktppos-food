@@ -1,11 +1,12 @@
 import express from 'express';
+import {configureHttp} from './http.mjs';
 import {menuPrice} from '../shared/pricing.mjs';
 import {createTableOrdering} from './table-ordering.mjs';
 import crypto from 'node:crypto';
 import {seed,categories} from './seed.mjs';
 import {assert,totals,can,scope,requireOpen,splitItems,money,management} from './domain.mjs';
-export function createApp({data=seed(),save=()=>{}}={}) {
- const app=express();const sessions=new Map();app.use((req,res,next)=>{res.set('Referrer-Policy','no-referrer');next();});app.use(express.json({limit:'1mb'}));
+export function createApp({data=seed(),save=()=>{},allowedOrigins=[],trustProxy=false}={}) {
+ const app=express();configureHttp(app,{allowedOrigins,trustProxy});const sessions=new Map();app.use((req,res,next)=>{res.set('Referrer-Policy','no-referrer');next();});app.use(express.json({limit:'1mb'}));
  const now=()=>new Date().toISOString();const uid=()=>crypto.randomUUID();
  const catalog=(u)=>data.menu.map(m=>({...m,...(data.menuCustom?.[u.tenantId]?.[m.id]||{}),overrides:{...m.overrides,...(data.menuCustom?.[u.tenantId]?.[m.id]?.overrides||{})}}));
  function audit(user,action,detail,branchId=user.branchId){data.audit.unshift({id:uid(),tenantId:user.tenantId,branchId,user:user.name,role:user.role,action,detail,at:now()});}

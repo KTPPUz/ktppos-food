@@ -59,6 +59,10 @@ Medium / Enterprise มีหน้า **QR สั่งอาหาร** ให
 
 ดู [คู่มือ QR และการเชื่อมต่อมือถือ](docs/QR-ORDERING.md) สำหรับวิธีใช้และ URL เครือข่ายของร้าน
 
+## เปิดออนไลน์จาก GitHub
+
+เตรียม `render.yaml` สำหรับรันทั้งระบบพร้อม persistent disk และ `.github/workflows/static.yml` สำหรับ frontend บน GitHub Pages ที่เชื่อม API แยกไว้แล้ว ดู [คู่มือ Deploy ทีละขั้นตอน](docs/DEPLOYMENT.md) ต้องเชื่อมบัญชี Render และกำหนด `VITE_API_BASE_URL` ใน GitHub ก่อนใช้ Pages
+
 ## ข้อมูลและการจัดเก็บ
 
 - 3 tenant / รวม 5 สาขา / 30 เมนู / 6 หมวด พร้อมรูปและตัวเลือก
@@ -88,6 +92,7 @@ Enterprise ตัดวัตถุดิบตามสูตรตัวอย
 ```sh
 npm test        # integration tests: REST API + business rules
 npm run build  # TypeScript + production bundle
+npm run test:production # production build + persistence/restart smoke
 npm run test:e2e  # Chrome: POS → KDS → receipt → report → refund + role/plan/responsive
 ```
 
@@ -104,6 +109,7 @@ E2E ใช้ Google Chrome ที่ติดตั้งในเครื่�
 - `server/seed.mjs` seed และสูตรตัวอย่าง
 - [โครงสร้างข้อมูล](docs/DATA-MODEL.md)
 - [แผนฐานข้อมูลและรายละเอียดตารางสำหรับสร้างภายหลัง](docs/DATABASE-SPEC.md)
+- [Deploy จาก GitHub / Render](docs/DEPLOYMENT.md)
 - [รายการ API](docs/API.md)
 - [โครงสร้าง UI และ flows](docs/DESIGN.md)
 - [Acceptance และ test cases](docs/TEST-CASES.md)

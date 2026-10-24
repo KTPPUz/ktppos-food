@@ -3,12 +3,14 @@ import QRCode from 'qrcode';
 import {QrCode,Armchair,ArrowUpRight,Copy,Download,Printer,X,AlertCircle,RefreshCw,LockKeyhole} from 'lucide-react';
 import type {State,TableSession} from './types';
 import {api} from './api';
+import {customerOrderUrl} from '../shared/deployment.mjs';
+import {externalApi,publicAppUrl} from './runtime';
 export default function TableQRPanel({state,branch,refresh,notify}:{state:State;branch:string;refresh:()=>Promise<unknown>;notify:(s:string)=>void}) {
   const [selected,setSelected]=useState<(TableSession&{token:string})|null>(null);
-  const [base,setBase]=useState(state.customerBaseUrls?.[0]||window.location.origin);
+  const [base,setBase]=useState(externalApi?publicAppUrl():(state.customerBaseUrls?.[0]||publicAppUrl()));
   const [image,setImage]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const tables=state.tables.filter(t=>t.branchId===branch);
-  let url='';try{const parsed=new URL(base);if(!['http:','https:'].includes(parsed.protocol)||parsed.username||parsed.password)throw new Error();url=selected?`${parsed.origin}/order/${selected.token}`:'';}catch{/* Invalid origins keep the QR hidden. */}
+  let url='';try{url=selected?customerOrderUrl(base,selected.token):'';}catch{/* Invalid origins keep the QR hidden. */}
   useEffect(()=>{let current=true;setImage('');if(url)QRCode.toDataURL(url,{width:640,margin:4,errorCorrectionLevel:'M',color:{dark:'#29312e',light:'#ffffff'}}).then(result=>{if(current)setImage(result);}).catch(()=>{if(current)setError('สร้าง QR ไม่สำเร็จ กรุณาลองใหม่');});return()=>{current=false;};},[url]);
   async function open(tableId:string){if(busy)return;setBusy(true);setError('');try{const s=await api(`/tables/${tableId}/session`,'POST');setSelected(s);await refresh();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
   async function close(){if(!selected||busy)return;setBusy(true);setError('');try{await api(`/table-sessions/${selected.id}/close`,'POST');setSelected(null);await refresh();notify('ปิดรอบ QR แล้ว');}catch(e){setError((e as Error).message);}finally{setBusy(false);}}

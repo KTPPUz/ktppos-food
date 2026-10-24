@@ -92,3 +92,7 @@ Public response ไม่คืนบัญชีพนักงาน PIN audit
 `npm test` ครอบคลุม tenant/branch/package/role, ราคาจากเซิร์ฟเวอร์, หลายมือถือ, กดซ้ำพร้อมกัน, validation, expiry, ย้ายโต๊ะ, รวม/แยกบิล และปิดรอบเมื่อชำระ
 
 `npm run test:e2e` ถอดรหัสรูป QR ที่แสดงจริงแล้วเปิดหน้าลูกค้า ทดสอบสอง browser contexts, รอบครัว, ปิดบิล และเครือข่ายขาดหลัง Backend รับรายการแล้ว พร้อมตรวจว่าลองส่งใหม่ไม่เพิ่มอาหารซ้ำ
+
+## ลิงก์ QR สำหรับโฮสต์ static
+
+ลิงก์ที่สร้างใหม่ใช้ `#/order/:token` โดยคง repository path เช่น `https://ktppuz.github.io/ktppos-food/#/order/...` เพื่อรีเฟรชบน GitHub Pages ได้ ลิงก์ `/order/:token` เดิมยังใช้ได้เมื่อรัน Node/Render ดู [คู่มือ Deploy](DEPLOYMENT.md) สำหรับการตั้ง API และ CORS

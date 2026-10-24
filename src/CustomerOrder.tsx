@@ -2,6 +2,7 @@ import {useState,useEffect,useRef} from 'react';
 import {UtensilsCrossed,Armchair,Search,Plus,Minus,X,ShoppingBag,ArrowRight,CheckCircle2,ChefHat,Clock,Leaf,AlertCircle,RefreshCw,ReceiptText,CheckCheck} from 'lucide-react';
 import type {MenuItem,Item,KitchenBatch,Totals} from './types';
 import {newId} from './ids';
+import {apiUrl} from './runtime';
 import {menuDiscountLabel} from '../shared/pricing.mjs';
 import './customer.css';
 type GuestMenu=Omit<MenuItem,'overrides'>&{originalPrice:number;discountAmount:number};
@@ -11,7 +12,7 @@ type Pending={requestId:string;items:Item[]};
 const money=(n:number)=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(n);
 const labels:Record<string,string>={draft:'รับรายการแล้ว',pending:'ครัวได้รับแล้ว',cooking:'กำลังปรุง',ready:'พร้อมเสิร์ฟ',served:'เสิร์ฟแล้ว',paid:'ชำระแล้ว',refunded:'คืนเงินแล้ว',cancelled:'ยกเลิก',merged:'รวมบิลแล้ว'};
 function restore<T,>(key:string,fallback:T):T{try{return JSON.parse(sessionStorage.getItem(key)||'null')??fallback;}catch{return fallback;}}
-async function request<T,>(token:string,path='',body?:unknown):Promise<T>{const response=await fetch(`/api/guest/${encodeURIComponent(token)}${path}`,{method:body?'POST':'GET',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});const value=await response.json();if(!response.ok)throw Object.assign(new Error(value.error||'เชื่อมต่อร้านไม่สำเร็จ'),{status:response.status});return value;}
+async function request<T,>(token:string,path='',body?:unknown):Promise<T>{const response=await fetch(apiUrl(`/guest/${encodeURIComponent(token)}${path}`),{method:body?'POST':'GET',credentials:'omit',cache:'no-store',headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});const value=await response.json();if(!response.ok)throw Object.assign(new Error(value.error||'เชื่อมต่อร้านไม่สำเร็จ'),{status:response.status});return value;}
 export default function CustomerOrder({token}:{token:string}){
  const storage=`bt-guest-${token}`,pendingKey=storage+'-pending';
  const [data,setData]=useState<GuestState|null>(null),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(''),[error,setError]=useState(''),[toast,setToast]=useState('');
@@ -46,7 +47,7 @@ export default function CustomerOrder({token}:{token:string}){
  const activeOrders=data.orders.filter(o=>!['cancelled','merged'].includes(o.status));
  const rounds=activeOrders.flatMap(o=>o.kitchenBatches?.length?o.kitchenBatches.map(b=>({key:b.id,number:o.number,round:b.round,status:b.status,at:b.createdAt,items:o.items.filter(i=>b.itemIds.includes(i.id))})): [{key:o.id,number:o.number,round:1,status:o.status,at:o.createdAt,items:o.items}]).filter(b=>b.items.length);
  const productPrice=product?product.price+product.modifiers.reduce((s,g)=>s+(g.options.find(o=>o.name===mods[g.id])?.price||0),0):0;
- return <div className="guest-app"><header className="guest-header"><a className="guest-brand" href={window.location.pathname}><div className="brand-mark"><UtensilsCrossed size={21}/></div><span>{data.restaurant.name}<small>GOOD FOOD. GOOD MOMENTS.</small></span></a><div className="guest-table"><Armchair size={17}/><span>โต๊ะ <b>{data.restaurant.table}</b></span></div></header><main className="guest-main"><div className="guest-demo"><span className="live-dot"/> DEMO · สั่งอาหารตัวอย่าง ไม่มีการเรียกเก็บเงินจริง</div>
+ return <div className="guest-app"><header className="guest-header"><a className="guest-brand" href={window.location.href}><div className="brand-mark"><UtensilsCrossed size={21}/></div><span>{data.restaurant.name}<small>GOOD FOOD. GOOD MOMENTS.</small></span></a><div className="guest-table"><Armchair size={17}/><span>โต๊ะ <b>{data.restaurant.table}</b></span></div></header><main className="guest-main"><div className="guest-demo"><span className="live-dot"/> DEMO · สั่งอาหารตัวอย่าง ไม่มีการเรียกเก็บเงินจริง</div>
  <section className="guest-welcome"><div className="eyebrow">A LITTLE MOMENT OF DELICIOUS</div><h1>มื้อนี้ อยากทานอะไรดี<span>?</span></h1><p>เลือกเมนูที่ชอบ แล้วให้ครัวดูแลมื้ออร่อยของคุณ</p><div><Leaf size={14}/> ปรุงสดทุกจาน <i/> สาขา{data.restaurant.branch}<span>{data.restaurant.seats} ที่นั่ง</span></div></section>
  {loadError&&<div className="error" role="alert"><AlertCircle size={17}/>{loadError}<button className="text-button" onClick={refresh}>ลองใหม่</button></div>}
  {!data.session.acceptingOrders&&<div className="guest-session-message" role="status"><AlertCircle size={20}/><div><strong>{data.session.active?'หยุดรับรายการเพิ่มชั่วคราว':'รอบบริการสิ้นสุดแล้ว'}</strong><p>{data.session.reason}</p></div></div>}

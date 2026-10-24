@@ -1,0 +1,30 @@
+# Complete app: React + Express API on one origin.
+# This paid compute plan supports the persistent disk required by the JSON demo.
+# Nothing is created until you connect this Blueprint in your Render account.
+services:
+  - type: web
+    name: ktp-table
+    runtime: node
+    plan: 0.5c-512mb
+    numInstances: 1
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOST
+        value: 0.0.0.0
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATA_DIR
+        value: /var/data/ktp-table
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://ktppuz.github.io
+    disk:
+      name: ktp-table-data
+      mountPath: /var/data
+      sizeGB: 1

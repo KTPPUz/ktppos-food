@@ -69,3 +69,10 @@
 - ตรวจราคา override ของสาขากับ guest API และป้องกัน client ปลอมราคา/ส่วนลด
 - ตรวจส่วนลด 100% สามารถแยกบิลและชำระยอดศูนย์ได้
 - Chrome ทดสอบตั้ง/ปิดส่วนลดผ่าน UI ราคา POS modifier และใบเสร็จ รวมถึงราคาลดบนหน้าลูกค้า QR
+
+## Deployment
+
+- API ตรวจ health check, CORS/preflight, staff authentication และ HTTPS ผ่าน trusted proxy
+- URL helper เก็บ repository path และใช้ hash route โดยรองรับลิงก์ /order เดิม
+- Chrome build frontend เป็น static files ใต้ /ktppos-food/ แยก origin จาก API ตรวจ login, QR, refresh, เปลี่ยน QR ในแท็บเดิม, ครัว และชำระ
+- `npm run test:production` ตรวจ static assets, SPA fallback, API, URL สาธารณะ และข้อมูล/การกันส่งซ้ำที่ยังอยู่หลัง restart โดยใช้ข้อมูลชั่วคราว
