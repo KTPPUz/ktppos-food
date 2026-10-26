@@ -1,0 +1,37 @@
+[
+  {
+    "id": "all",
+    "name": "ทั้งหมด",
+    "icon": "Grid2X2"
+  },
+  {
+    "id": "main",
+    "name": "จานหลัก",
+    "icon": "Utensils"
+  },
+  {
+    "id": "noodle",
+    "name": "เส้น & ซุป",
+    "icon": "Soup"
+  },
+  {
+    "id": "snack",
+    "name": "ทานเล่น",
+    "icon": "Pizza"
+  },
+  {
+    "id": "salad",
+    "name": "สลัด & ยำ",
+    "icon": "Salad"
+  },
+  {
+    "id": "drink",
+    "name": "เครื่องดื่ม",
+    "icon": "Coffee"
+  },
+  {
+    "id": "dessert",
+    "name": "ของหวาน",
+    "icon": "IceCreamBowl"
+  }
+]

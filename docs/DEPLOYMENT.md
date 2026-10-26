@@ -1,3 +1,5 @@
+> แนวทาง Node/Render และ static demo รุ่นเดิม สำหรับ Laravel/PHP + MariaDB บน Hostinger ให้ใช้ [คู่มือ Hostinger](HOSTINGER.md)
+
 # เปิด KTP Table ออนไลน์จาก GitHub
 
 เอกสารนี้ใช้ repository `KTPPUz/ktppos-food` เป็นตัวอย่าง มีสามวิธีที่ใช้โค้ดชุดเดียวกันได้:

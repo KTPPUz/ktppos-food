@@ -1,0 +1,3793 @@
+{
+  "tenants": [
+    {
+      "id": "cafe",
+      "name": "Little Day Café",
+      "plan": "Small"
+    },
+    {
+      "id": "restaurant",
+      "name": "KTP Table",
+      "plan": "Medium"
+    },
+    {
+      "id": "brand",
+      "name": "KTP Table Group",
+      "plan": "Enterprise"
+    }
+  ],
+  "branches": [
+    {
+      "id": "c1",
+      "tenantId": "cafe",
+      "name": "อารีย์",
+      "target": 10000
+    },
+    {
+      "id": "r1",
+      "tenantId": "restaurant",
+      "name": "สุขุมวิท",
+      "target": 20000
+    },
+    {
+      "id": "b1",
+      "tenantId": "brand",
+      "name": "สุขุมวิท",
+      "target": 22000
+    },
+    {
+      "id": "b2",
+      "tenantId": "brand",
+      "name": "อารีย์",
+      "target": 18000
+    },
+    {
+      "id": "b3",
+      "tenantId": "brand",
+      "name": "สาทร",
+      "target": 25000
+    }
+  ],
+  "menu": [
+    {
+      "id": "m1",
+      "category": "main",
+      "name": "ข้าวกะเพราเนื้อไข่ดาว",
+      "en": "Basil beef & fried egg",
+      "price": 129,
+      "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80",
+      "popular": true,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m2",
+      "category": "main",
+      "name": "ข้าวผัดกุ้ง",
+      "en": "Shrimp fried rice",
+      "price": 119,
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
+      "popular": true,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m3",
+      "category": "main",
+      "name": "ข้าวไก่ย่างจิ้มแจ่ว",
+      "en": "Grilled chicken rice",
+      "price": 109,
+      "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m4",
+      "category": "main",
+      "name": "ข้าวหมูทอดกระเทียม",
+      "en": "Garlic pork rice",
+      "price": 99,
+      "image": "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m5",
+      "category": "main",
+      "name": "ข้าวผัดสับปะรด",
+      "en": "Pineapple fried rice",
+      "price": 139,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m6",
+      "category": "noodle",
+      "name": "ผัดไทยกุ้งสด",
+      "en": "Signature pad thai",
+      "price": 139,
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
+      "popular": true,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m7",
+      "category": "noodle",
+      "name": "ต้มยำกุ้งน้ำข้น",
+      "en": "Creamy tom yum soup",
+      "price": 189,
+      "image": "https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=600&q=80",
+      "popular": true,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m8",
+      "category": "noodle",
+      "name": "ก๋วยเตี๋ยวเนื้อตุ๋น",
+      "en": "Braised beef noodles",
+      "price": 119,
+      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m9",
+      "category": "noodle",
+      "name": "สปาเก็ตตี้ขี้เมาทะเล",
+      "en": "Spicy seafood pasta",
+      "price": 169,
+      "image": "https://images.unsplash.com/photo-1557872943-16a5ac26437e?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m10",
+      "category": "noodle",
+      "name": "ต้มข่าไก่",
+      "en": "Coconut chicken soup",
+      "price": 159,
+      "image": "https://images.unsplash.com/photo-1547928576-b822bc410bdf?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m11",
+      "category": "snack",
+      "name": "เฟรนช์ฟรายส์",
+      "en": "Golden french fries",
+      "price": 79,
+      "image": "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m12",
+      "category": "snack",
+      "name": "ปีกไก่ทอดน้ำปลา",
+      "en": "Crispy chicken wings",
+      "price": 119,
+      "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m13",
+      "category": "snack",
+      "name": "พิซซ่าหน้ากะเพรา",
+      "en": "Thai basil pizza",
+      "price": 189,
+      "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m14",
+      "category": "snack",
+      "name": "ทอดมันกุ้ง",
+      "en": "Thai shrimp cakes",
+      "price": 139,
+      "image": "https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m15",
+      "category": "snack",
+      "name": "ปอเปี๊ยะผัก",
+      "en": "Vegetable spring rolls",
+      "price": 89,
+      "image": "https://images.unsplash.com/photo-1548340748-6d98e40f0199?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m16",
+      "category": "salad",
+      "name": "สลัดอกไก่ย่าง",
+      "en": "Grilled chicken salad",
+      "price": 149,
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m17",
+      "category": "salad",
+      "name": "ซีซาร์สลัด",
+      "en": "Classic caesar salad",
+      "price": 139,
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m18",
+      "category": "salad",
+      "name": "ยำวุ้นเส้นทะเล",
+      "en": "Seafood glass noodle salad",
+      "price": 149,
+      "image": "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m19",
+      "category": "salad",
+      "name": "ส้มตำไทย",
+      "en": "Thai papaya salad",
+      "price": 79,
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m20",
+      "category": "salad",
+      "name": "ยำเห็ดรวม",
+      "en": "Spicy mushroom salad",
+      "price": 119,
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "protein",
+          "name": "เพิ่มความอร่อย",
+          "options": [
+            {
+              "name": "ปกติ",
+              "price": 0
+            },
+            {
+              "name": "เพิ่มไข่ดาว",
+              "price": 15
+            },
+            {
+              "name": "พิเศษ",
+              "price": 25
+            }
+          ]
+        },
+        {
+          "id": "spice",
+          "name": "ระดับความเผ็ด",
+          "options": [
+            {
+              "name": "เผ็ดปกติ",
+              "price": 0
+            },
+            {
+              "name": "เผ็ดน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่เผ็ด",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m21",
+      "category": "drink",
+      "name": "ชาไทยเย็น",
+      "en": "Iced Thai milk tea",
+      "price": 65,
+      "image": "https://images.unsplash.com/photo-1513558161293-cdaf765edfd7?auto=format&fit=crop&w=600&q=80",
+      "popular": true,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "sweet",
+          "name": "ความหวาน",
+          "options": [
+            {
+              "name": "หวานปกติ",
+              "price": 0
+            },
+            {
+              "name": "หวานน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่หวาน",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m22",
+      "category": "drink",
+      "name": "ยูซุโซดา",
+      "en": "Sparkling yuzu",
+      "price": 85,
+      "image": "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "sweet",
+          "name": "ความหวาน",
+          "options": [
+            {
+              "name": "หวานปกติ",
+              "price": 0
+            },
+            {
+              "name": "หวานน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่หวาน",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m23",
+      "category": "drink",
+      "name": "อเมริกาโน่เย็น",
+      "en": "Iced americano",
+      "price": 75,
+      "image": "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "sweet",
+          "name": "ความหวาน",
+          "options": [
+            {
+              "name": "หวานปกติ",
+              "price": 0
+            },
+            {
+              "name": "หวานน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่หวาน",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m24",
+      "category": "drink",
+      "name": "ลาเต้เย็น",
+      "en": "Iced cafe latte",
+      "price": 85,
+      "image": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "sweet",
+          "name": "ความหวาน",
+          "options": [
+            {
+              "name": "หวานปกติ",
+              "price": 0
+            },
+            {
+              "name": "หวานน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่หวาน",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m25",
+      "category": "drink",
+      "name": "น้ำแตงโมปั่น",
+      "en": "Watermelon smoothie",
+      "price": 79,
+      "image": "https://images.unsplash.com/photo-1439404212301-3f7c5e1e444e?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": [
+        {
+          "id": "sweet",
+          "name": "ความหวาน",
+          "options": [
+            {
+              "name": "หวานปกติ",
+              "price": 0
+            },
+            {
+              "name": "หวานน้อย",
+              "price": 0
+            },
+            {
+              "name": "ไม่หวาน",
+              "price": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m26",
+      "category": "dessert",
+      "name": "ข้าวเหนียวมะม่วง",
+      "en": "Mango sticky rice",
+      "price": 129,
+      "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80",
+      "popular": true,
+      "available": true,
+      "overrides": {},
+      "modifiers": []
+    },
+    {
+      "id": "m27",
+      "category": "dessert",
+      "name": "ไอศกรีมกะทิ",
+      "en": "Coconut ice cream",
+      "price": 69,
+      "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": []
+    },
+    {
+      "id": "m28",
+      "category": "dessert",
+      "name": "ฮันนี่โทสต์",
+      "en": "Honey butter toast",
+      "price": 159,
+      "image": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": []
+    },
+    {
+      "id": "m29",
+      "category": "dessert",
+      "name": "ชีสเค้กสตรอว์เบอร์รี",
+      "en": "Strawberry cheesecake",
+      "price": 139,
+      "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": []
+    },
+    {
+      "id": "m30",
+      "category": "dessert",
+      "name": "บราวนี่ช็อกโกแลต",
+      "en": "Chocolate brownie",
+      "price": 89,
+      "image": "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=80",
+      "popular": false,
+      "available": true,
+      "overrides": {},
+      "modifiers": []
+    }
+  ],
+  "users": [
+    {
+      "id": "cafe-u0",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "พิมพ์ชนก",
+      "role": "Owner",
+      "email": "owner@cafe.demo"
+    },
+    {
+      "id": "cafe-u1",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ธนกร",
+      "role": "Manager",
+      "email": "manager@cafe.demo"
+    },
+    {
+      "id": "cafe-u2",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "มินตรา",
+      "role": "Cashier",
+      "email": "cashier@cafe.demo"
+    },
+    {
+      "id": "cafe-u3",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "กานต์",
+      "role": "Waiter",
+      "email": "waiter@cafe.demo"
+    },
+    {
+      "id": "cafe-u4",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "เชฟต้น",
+      "role": "Kitchen",
+      "email": "kitchen@cafe.demo"
+    },
+    {
+      "id": "cafe-u5",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "อรทัย",
+      "role": "HQ Admin",
+      "email": "hqadmin@cafe.demo"
+    },
+    {
+      "id": "cafe-u6",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ณัฐพล",
+      "role": "Cashier",
+      "email": "cashier@cafe.demo"
+    },
+    {
+      "id": "cafe-u7",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "แพรวา",
+      "role": "Waiter",
+      "email": "waiter@cafe.demo"
+    },
+    {
+      "id": "restaurant-u0",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "พิมพ์ชนก",
+      "role": "Owner",
+      "email": "owner@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u1",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ธนกร",
+      "role": "Manager",
+      "email": "manager@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u2",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "มินตรา",
+      "role": "Cashier",
+      "email": "cashier@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u3",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "กานต์",
+      "role": "Waiter",
+      "email": "waiter@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u4",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "เชฟต้น",
+      "role": "Kitchen",
+      "email": "kitchen@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u5",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "อรทัย",
+      "role": "HQ Admin",
+      "email": "hqadmin@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u6",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ณัฐพล",
+      "role": "Cashier",
+      "email": "cashier@restaurant.demo"
+    },
+    {
+      "id": "restaurant-u7",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "แพรวา",
+      "role": "Waiter",
+      "email": "waiter@restaurant.demo"
+    },
+    {
+      "id": "brand-u0",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "พิมพ์ชนก",
+      "role": "Owner",
+      "email": "owner@brand.demo"
+    },
+    {
+      "id": "brand-u1",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ธนกร",
+      "role": "Manager",
+      "email": "manager@brand.demo"
+    },
+    {
+      "id": "brand-u2",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "มินตรา",
+      "role": "Cashier",
+      "email": "cashier@brand.demo"
+    },
+    {
+      "id": "brand-u3",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "กานต์",
+      "role": "Waiter",
+      "email": "waiter@brand.demo"
+    },
+    {
+      "id": "brand-u4",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "เชฟต้น",
+      "role": "Kitchen",
+      "email": "kitchen@brand.demo"
+    },
+    {
+      "id": "brand-u5",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "อรทัย",
+      "role": "HQ Admin",
+      "email": "hqadmin@brand.demo"
+    },
+    {
+      "id": "brand-u6",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ณัฐพล",
+      "role": "Cashier",
+      "email": "cashier@brand.demo"
+    },
+    {
+      "id": "brand-u7",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "แพรวา",
+      "role": "Waiter",
+      "email": "waiter@brand.demo"
+    }
+  ],
+  "ingredients": [
+    {
+      "id": "c1-i0",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ข้าวหอมมะลิ",
+      "unit": "กก.",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i1",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "เนื้อวัว",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i2",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "เนื้อหมู",
+      "unit": "กก.",
+      "stock": 15,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i3",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "อกไก่",
+      "unit": "กก.",
+      "stock": 10,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i4",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "กุ้งสด",
+      "unit": "กก.",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i5",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ไข่ไก่",
+      "unit": "ฟอง",
+      "stock": 85,
+      "minimum": 30
+    },
+    {
+      "id": "c1-i6",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ใบกะเพรา",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i7",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "กระเทียม",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i8",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "พริกสด",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i9",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "น้ำปลา",
+      "unit": "ลิตร",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i10",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "น้ำมันพืช",
+      "unit": "ลิตร",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i11",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "น้ำตาล",
+      "unit": "กก.",
+      "stock": 7,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i12",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "เส้นจันท์",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i13",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "กะทิ",
+      "unit": "ลิตร",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i14",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "นมสด",
+      "unit": "ลิตร",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i15",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "เมล็ดกาแฟ",
+      "unit": "กก.",
+      "stock": 6,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i16",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ใบชาไทย",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i17",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "มะม่วง",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i18",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "มะนาว",
+      "unit": "กก.",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "c1-i19",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "ผักสลัด",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i0",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ข้าวหอมมะลิ",
+      "unit": "กก.",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i1",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "เนื้อวัว",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i2",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "เนื้อหมู",
+      "unit": "กก.",
+      "stock": 15,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i3",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "อกไก่",
+      "unit": "กก.",
+      "stock": 10,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i4",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "กุ้งสด",
+      "unit": "กก.",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i5",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ไข่ไก่",
+      "unit": "ฟอง",
+      "stock": 85,
+      "minimum": 30
+    },
+    {
+      "id": "r1-i6",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ใบกะเพรา",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i7",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "กระเทียม",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i8",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "พริกสด",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i9",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "น้ำปลา",
+      "unit": "ลิตร",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i10",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "น้ำมันพืช",
+      "unit": "ลิตร",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i11",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "น้ำตาล",
+      "unit": "กก.",
+      "stock": 7,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i12",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "เส้นจันท์",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i13",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "กะทิ",
+      "unit": "ลิตร",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i14",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "นมสด",
+      "unit": "ลิตร",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i15",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "เมล็ดกาแฟ",
+      "unit": "กก.",
+      "stock": 6,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i16",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ใบชาไทย",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i17",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "มะม่วง",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i18",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "มะนาว",
+      "unit": "กก.",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "r1-i19",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "ผักสลัด",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i0",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ข้าวหอมมะลิ",
+      "unit": "กก.",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i1",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "เนื้อวัว",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i2",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "เนื้อหมู",
+      "unit": "กก.",
+      "stock": 15,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i3",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "อกไก่",
+      "unit": "กก.",
+      "stock": 10,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i4",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "กุ้งสด",
+      "unit": "กก.",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i5",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ไข่ไก่",
+      "unit": "ฟอง",
+      "stock": 85,
+      "minimum": 30
+    },
+    {
+      "id": "b1-i6",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ใบกะเพรา",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i7",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "กระเทียม",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i8",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "พริกสด",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i9",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "น้ำปลา",
+      "unit": "ลิตร",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i10",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "น้ำมันพืช",
+      "unit": "ลิตร",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i11",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "น้ำตาล",
+      "unit": "กก.",
+      "stock": 7,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i12",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "เส้นจันท์",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i13",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "กะทิ",
+      "unit": "ลิตร",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i14",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "นมสด",
+      "unit": "ลิตร",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i15",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "เมล็ดกาแฟ",
+      "unit": "กก.",
+      "stock": 6,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i16",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ใบชาไทย",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i17",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "มะม่วง",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i18",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "มะนาว",
+      "unit": "กก.",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "b1-i19",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "ผักสลัด",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i0",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "ข้าวหอมมะลิ",
+      "unit": "กก.",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i1",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "เนื้อวัว",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i2",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "เนื้อหมู",
+      "unit": "กก.",
+      "stock": 15,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i3",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "อกไก่",
+      "unit": "กก.",
+      "stock": 10,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i4",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "กุ้งสด",
+      "unit": "กก.",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i5",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "ไข่ไก่",
+      "unit": "ฟอง",
+      "stock": 85,
+      "minimum": 30
+    },
+    {
+      "id": "b2-i6",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "ใบกะเพรา",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i7",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "กระเทียม",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i8",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "พริกสด",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i9",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "น้ำปลา",
+      "unit": "ลิตร",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i10",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "น้ำมันพืช",
+      "unit": "ลิตร",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i11",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "น้ำตาล",
+      "unit": "กก.",
+      "stock": 7,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i12",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "เส้นจันท์",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i13",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "กะทิ",
+      "unit": "ลิตร",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i14",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "นมสด",
+      "unit": "ลิตร",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i15",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "เมล็ดกาแฟ",
+      "unit": "กก.",
+      "stock": 6,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i16",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "ใบชาไทย",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i17",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "มะม่วง",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i18",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "มะนาว",
+      "unit": "กก.",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "b2-i19",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "ผักสลัด",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i0",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "ข้าวหอมมะลิ",
+      "unit": "กก.",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i1",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "เนื้อวัว",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i2",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "เนื้อหมู",
+      "unit": "กก.",
+      "stock": 15,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i3",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "อกไก่",
+      "unit": "กก.",
+      "stock": 10,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i4",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "กุ้งสด",
+      "unit": "กก.",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i5",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "ไข่ไก่",
+      "unit": "ฟอง",
+      "stock": 85,
+      "minimum": 30
+    },
+    {
+      "id": "b3-i6",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "ใบกะเพรา",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i7",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "กระเทียม",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i8",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "พริกสด",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i9",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "น้ำปลา",
+      "unit": "ลิตร",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i10",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "น้ำมันพืช",
+      "unit": "ลิตร",
+      "stock": 12,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i11",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "น้ำตาล",
+      "unit": "กก.",
+      "stock": 7,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i12",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "เส้นจันท์",
+      "unit": "กก.",
+      "stock": 5,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i13",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "กะทิ",
+      "unit": "ลิตร",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i14",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "นมสด",
+      "unit": "ลิตร",
+      "stock": 2,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i15",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "เมล็ดกาแฟ",
+      "unit": "กก.",
+      "stock": 6,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i16",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "ใบชาไทย",
+      "unit": "กก.",
+      "stock": 3,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i17",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "มะม่วง",
+      "unit": "กก.",
+      "stock": 8,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i18",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "มะนาว",
+      "unit": "กก.",
+      "stock": 4,
+      "minimum": 3
+    },
+    {
+      "id": "b3-i19",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "ผักสลัด",
+      "unit": "กก.",
+      "stock": 1,
+      "minimum": 3
+    }
+  ],
+  "tables": [
+    {
+      "id": "c1-t1",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T01",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "c1-t2",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T02",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "c1-t3",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T03",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "c1-t4",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T04",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "c1-t5",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T05",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "c1-t6",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T06",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t7",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T07",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t8",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T08",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t9",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T09",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t10",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T10",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t11",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T11",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t12",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T12",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "c1-t13",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T13",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "c1-t14",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T14",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "c1-t15",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "name": "T15",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "r1-t1",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T01",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "r1-t2",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T02",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "r1-t3",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T03",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "r1-t4",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T04",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "r1-t5",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T05",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "r1-t6",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T06",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t7",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T07",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t8",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T08",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t9",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T09",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t10",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T10",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t11",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T11",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t12",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T12",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "r1-t13",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T13",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "r1-t14",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T14",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "r1-t15",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "name": "T15",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b1-t1",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T01",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b1-t2",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T02",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b1-t3",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T03",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b1-t4",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T04",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b1-t5",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T05",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b1-t6",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T06",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t7",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T07",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t8",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T08",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t9",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T09",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t10",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T10",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t11",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T11",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t12",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T12",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b1-t13",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T13",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b1-t14",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T14",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b1-t15",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "name": "T15",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b2-t1",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T01",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b2-t2",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T02",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b2-t3",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T03",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b2-t4",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T04",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b2-t5",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T05",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b2-t6",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T06",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t7",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T07",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t8",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T08",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t9",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T09",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t10",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T10",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t11",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T11",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t12",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T12",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b2-t13",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T13",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b2-t14",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T14",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b2-t15",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "name": "T15",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b3-t1",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T01",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b3-t2",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T02",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b3-t3",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T03",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b3-t4",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T04",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b3-t5",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T05",
+      "seats": 2,
+      "reservation": null
+    },
+    {
+      "id": "b3-t6",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T06",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t7",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T07",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t8",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T08",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t9",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T09",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t10",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T10",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t11",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T11",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t12",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T12",
+      "seats": 4,
+      "reservation": null
+    },
+    {
+      "id": "b3-t13",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T13",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b3-t14",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T14",
+      "seats": 6,
+      "reservation": null
+    },
+    {
+      "id": "b3-t15",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "name": "T15",
+      "seats": 6,
+      "reservation": null
+    }
+  ],
+  "orders": [
+    {
+      "id": "o1226",
+      "number": 1226,
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "type": "dinein",
+      "tableId": "c1-t1",
+      "items": [
+        {
+          "id": "seeditem-5",
+          "menuId": "m6",
+          "name": "ผัดไทยกุ้งสด",
+          "unitPrice": 139,
+          "qty": 3,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "pending",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:50:47.911Z",
+      "createdBy": "cafe-u3"
+    },
+    {
+      "id": "o1227",
+      "number": 1227,
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "type": "dinein",
+      "tableId": "c1-t2",
+      "items": [
+        {
+          "id": "seeditem-6",
+          "menuId": "m7",
+          "name": "ต้มยำกุ้งน้ำข้น",
+          "unitPrice": 189,
+          "qty": 1,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "cooking",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:43:47.911Z",
+      "createdBy": "cafe-u3"
+    },
+    {
+      "id": "o1228",
+      "number": 1228,
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "type": "dinein",
+      "tableId": "c1-t3",
+      "items": [
+        {
+          "id": "seeditem-7",
+          "menuId": "m8",
+          "name": "ก๋วยเตี๋ยวเนื้อตุ๋น",
+          "unitPrice": 119,
+          "qty": 2,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "ready",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:36:47.911Z",
+      "createdBy": "cafe-u3"
+    },
+    {
+      "id": "o1454",
+      "number": 1454,
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "type": "dinein",
+      "tableId": "r1-t1",
+      "items": [
+        {
+          "id": "seeditem-5",
+          "menuId": "m6",
+          "name": "ผัดไทยกุ้งสด",
+          "unitPrice": 139,
+          "qty": 3,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "pending",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:50:47.913Z",
+      "createdBy": "restaurant-u3"
+    },
+    {
+      "id": "o1455",
+      "number": 1455,
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "type": "dinein",
+      "tableId": "r1-t2",
+      "items": [
+        {
+          "id": "seeditem-6",
+          "menuId": "m7",
+          "name": "ต้มยำกุ้งน้ำข้น",
+          "unitPrice": 189,
+          "qty": 1,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "cooking",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:43:47.913Z",
+      "createdBy": "restaurant-u3"
+    },
+    {
+      "id": "o1456",
+      "number": 1456,
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "type": "dinein",
+      "tableId": "r1-t3",
+      "items": [
+        {
+          "id": "seeditem-7",
+          "menuId": "m8",
+          "name": "ก๋วยเตี๋ยวเนื้อตุ๋น",
+          "unitPrice": 119,
+          "qty": 2,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "ready",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:36:47.913Z",
+      "createdBy": "restaurant-u3"
+    },
+    {
+      "id": "o1682",
+      "number": 1682,
+      "tenantId": "brand",
+      "branchId": "b1",
+      "type": "dinein",
+      "tableId": "b1-t1",
+      "items": [
+        {
+          "id": "seeditem-5",
+          "menuId": "m6",
+          "name": "ผัดไทยกุ้งสด",
+          "unitPrice": 139,
+          "qty": 3,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "pending",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:50:47.913Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o1683",
+      "number": 1683,
+      "tenantId": "brand",
+      "branchId": "b1",
+      "type": "dinein",
+      "tableId": "b1-t2",
+      "items": [
+        {
+          "id": "seeditem-6",
+          "menuId": "m7",
+          "name": "ต้มยำกุ้งน้ำข้น",
+          "unitPrice": 189,
+          "qty": 1,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "cooking",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:43:47.913Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o1684",
+      "number": 1684,
+      "tenantId": "brand",
+      "branchId": "b1",
+      "type": "dinein",
+      "tableId": "b1-t3",
+      "items": [
+        {
+          "id": "seeditem-7",
+          "menuId": "m8",
+          "name": "ก๋วยเตี๋ยวเนื้อตุ๋น",
+          "unitPrice": 119,
+          "qty": 2,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "ready",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:36:47.913Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o1910",
+      "number": 1910,
+      "tenantId": "brand",
+      "branchId": "b2",
+      "type": "dinein",
+      "tableId": "b2-t1",
+      "items": [
+        {
+          "id": "seeditem-5",
+          "menuId": "m6",
+          "name": "ผัดไทยกุ้งสด",
+          "unitPrice": 139,
+          "qty": 3,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "pending",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:50:47.916Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o1911",
+      "number": 1911,
+      "tenantId": "brand",
+      "branchId": "b2",
+      "type": "dinein",
+      "tableId": "b2-t2",
+      "items": [
+        {
+          "id": "seeditem-6",
+          "menuId": "m7",
+          "name": "ต้มยำกุ้งน้ำข้น",
+          "unitPrice": 189,
+          "qty": 1,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "cooking",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:43:47.916Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o1912",
+      "number": 1912,
+      "tenantId": "brand",
+      "branchId": "b2",
+      "type": "dinein",
+      "tableId": "b2-t3",
+      "items": [
+        {
+          "id": "seeditem-7",
+          "menuId": "m8",
+          "name": "ก๋วยเตี๋ยวเนื้อตุ๋น",
+          "unitPrice": 119,
+          "qty": 2,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "ready",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:36:47.916Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o2138",
+      "number": 2138,
+      "tenantId": "brand",
+      "branchId": "b3",
+      "type": "dinein",
+      "tableId": "b3-t1",
+      "items": [
+        {
+          "id": "seeditem-5",
+          "menuId": "m6",
+          "name": "ผัดไทยกุ้งสด",
+          "unitPrice": 139,
+          "qty": 3,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "pending",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:50:47.916Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o2139",
+      "number": 2139,
+      "tenantId": "brand",
+      "branchId": "b3",
+      "type": "dinein",
+      "tableId": "b3-t2",
+      "items": [
+        {
+          "id": "seeditem-6",
+          "menuId": "m7",
+          "name": "ต้มยำกุ้งน้ำข้น",
+          "unitPrice": 189,
+          "qty": 1,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "cooking",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:43:47.916Z",
+      "createdBy": "brand-u3"
+    },
+    {
+      "id": "o2140",
+      "number": 2140,
+      "tenantId": "brand",
+      "branchId": "b3",
+      "type": "dinein",
+      "tableId": "b3-t3",
+      "items": [
+        {
+          "id": "seeditem-7",
+          "menuId": "m8",
+          "name": "ก๋วยเตี๋ยวเนื้อตุ๋น",
+          "unitPrice": 119,
+          "qty": 2,
+          "note": "",
+          "modifiers": [],
+          "status": "pending"
+        }
+      ],
+      "status": "ready",
+      "discount": 0,
+      "serviceRate": 0,
+      "taxRate": 7,
+      "createdAt": "2026-10-26T03:36:47.916Z",
+      "createdBy": "brand-u3"
+    }
+  ],
+  "recipes": [
+    {
+      "menuId": "m1",
+      "parts": [
+        {
+          "index": 0,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m2",
+      "parts": [
+        {
+          "index": 1,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m3",
+      "parts": [
+        {
+          "index": 2,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m4",
+      "parts": [
+        {
+          "index": 3,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m5",
+      "parts": [
+        {
+          "index": 4,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m6",
+      "parts": [
+        {
+          "index": 5,
+          "qty": 1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m7",
+      "parts": [
+        {
+          "index": 6,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m8",
+      "parts": [
+        {
+          "index": 7,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m9",
+      "parts": [
+        {
+          "index": 8,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m10",
+      "parts": [
+        {
+          "index": 9,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m11",
+      "parts": [
+        {
+          "index": 10,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m12",
+      "parts": [
+        {
+          "index": 11,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m13",
+      "parts": [
+        {
+          "index": 12,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m14",
+      "parts": [
+        {
+          "index": 13,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m15",
+      "parts": [
+        {
+          "index": 14,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m16",
+      "parts": [
+        {
+          "index": 15,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m17",
+      "parts": [
+        {
+          "index": 16,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m18",
+      "parts": [
+        {
+          "index": 17,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m19",
+      "parts": [
+        {
+          "index": 18,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m20",
+      "parts": [
+        {
+          "index": 19,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m21",
+      "parts": [
+        {
+          "index": 0,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m22",
+      "parts": [
+        {
+          "index": 1,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m23",
+      "parts": [
+        {
+          "index": 2,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m24",
+      "parts": [
+        {
+          "index": 3,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m25",
+      "parts": [
+        {
+          "index": 4,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m26",
+      "parts": [
+        {
+          "index": 5,
+          "qty": 1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m27",
+      "parts": [
+        {
+          "index": 6,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m28",
+      "parts": [
+        {
+          "index": 7,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m29",
+      "parts": [
+        {
+          "index": 8,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    },
+    {
+      "menuId": "m30",
+      "parts": [
+        {
+          "index": 9,
+          "qty": 0.1
+        },
+        {
+          "index": 0,
+          "qty": 0.15
+        }
+      ]
+    }
+  ],
+  "transfers": [],
+  "movements": [],
+  "shifts": [
+    {
+      "id": "shift-c1",
+      "tenantId": "cafe",
+      "branchId": "c1",
+      "open": true,
+      "openingCash": 2000,
+      "openedAt": "2026-10-26T03:57:47.916Z"
+    },
+    {
+      "id": "shift-r1",
+      "tenantId": "restaurant",
+      "branchId": "r1",
+      "open": true,
+      "openingCash": 2000,
+      "openedAt": "2026-10-26T03:57:47.916Z"
+    },
+    {
+      "id": "shift-b1",
+      "tenantId": "brand",
+      "branchId": "b1",
+      "open": true,
+      "openingCash": 2000,
+      "openedAt": "2026-10-26T03:57:47.916Z"
+    },
+    {
+      "id": "shift-b2",
+      "tenantId": "brand",
+      "branchId": "b2",
+      "open": true,
+      "openingCash": 2000,
+      "openedAt": "2026-10-26T03:57:47.916Z"
+    },
+    {
+      "id": "shift-b3",
+      "tenantId": "brand",
+      "branchId": "b3",
+      "open": true,
+      "openingCash": 2000,
+      "openedAt": "2026-10-26T03:57:47.916Z"
+    }
+  ],
+  "audit": [],
+  "settings": [
+    {
+      "tenantId": "cafe",
+      "taxRate": 7,
+      "serviceRate": 0
+    },
+    {
+      "tenantId": "restaurant",
+      "taxRate": 7,
+      "serviceRate": 0
+    },
+    {
+      "tenantId": "brand",
+      "taxRate": 7,
+      "serviceRate": 0
+    }
+  ],
+  "nextOrder": 2141
+}

@@ -1,3 +1,5 @@
+> API นี้ให้บริการด้วย Laravel/PHP แล้ว โดยคงรูปแบบ response และเส้นทางเดิม ดู [คู่มือ Hostinger/MariaDB](HOSTINGER.md) สำหรับการติดตั้ง
+
 # REST API — Demo v1
 
 Base URL: `http://localhost:5173/api` JSON ทั้งหมด ใช้ `Authorization: Bearer <token>` ทุก endpoint ยกเว้น `/demo`, `/auth/login` และ `/guest/:token` ซึ่งใช้ token รอบโต๊ะจาก QR ข้อผิดพลาดส่ง `{ "error": "ข้อความภาษาไทย" }`

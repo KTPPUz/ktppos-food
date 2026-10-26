@@ -1,3 +1,5 @@
+> เอกสารฐานข้อมูลรุ่น Express/PostgreSQL เดิม ปัจจุบันใช้ Laravel/MariaDB ดู [คู่มือ Hostinger](HOSTINGER.md)
+
 # PostgreSQL + Prisma
 
 ระบบรองรับ PostgreSQL ผ่าน Prisma ORM 6.19.x โดยคง React / Express และ API เดิมไว้ หากมี `DATABASE_URL` ระบบเลือก PostgreSQL อัตโนมัติ หรือกำหนด `STORAGE_DRIVER=postgres` อย่างชัดเจน ถ้าไม่ได้ตั้งทั้งสองค่า จะใช้ JSON demo ตามเดิม ฐานข้อมูลที่เชื่อมต่อไม่ได้หรือยังไม่ migrate จะทำให้เซิร์ฟเวอร์หยุดเริ่มทำงาน ไม่มีการ fallback ไปเขียน JSON

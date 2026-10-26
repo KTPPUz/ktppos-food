@@ -1,10 +1,11 @@
 services:
   postgres:
+    profiles: [legacy]
     image: postgres:17-alpine
     environment:
       POSTGRES_DB: pos_food
       POSTGRES_USER: pos_food
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
     volumes:
@@ -15,5 +16,34 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: pos_food
+      MARIADB_USER: pos_food
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?Set MARIADB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:55433:3306"
+    volumes:
+      - pos_food_mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+    ports:
+      - "127.0.0.1:8081:80"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
 volumes:
+  pos_food_mariadb:
   pos_food_postgres:

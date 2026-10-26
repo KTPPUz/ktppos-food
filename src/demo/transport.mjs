@@ -8,7 +8,7 @@ const sessionsKey='ktp-table-mockup-sessions-v1:'+import.meta.env.BASE_URL;
 function router(){
  const layers=[];
  const app={locals:{customerBaseUrls:[new URL(import.meta.env.BASE_URL,location.origin).href.replace(/\/$/,'')]}};
- for(const method of ['get','post','patch','use'])app[method]=(...args)=>{
+ for(const method of ['get','post','patch','delete','use'])app[method]=(...args)=>{
   const path=typeof args[0]==='string'?args.shift():'/';
   for(const handler of args)layers.push({method,path,handler});
  };

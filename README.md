@@ -1,3 +1,16 @@
+# KTP Table — Laravel + MariaDB
+
+Stack หลักปัจจุบันคือ **React + TypeScript → Laravel 12 / PHP 8.3 → MariaDB** สำหรับ Hostinger Web Hosting โดยไม่ต้องใช้ VPS หรือรัน Node.js บน production ใช้ phpMyAdmin จัดการฐานข้อมูลได้
+
+ดู [คู่มือติดตั้ง Hostinger และย้ายข้อมูลเดิม](docs/HOSTINGER.md)
+
+- เริ่มพัฒนา: ตั้ง `backend/.env`, ติดตั้ง Composer dependencies, migrate/import แล้ว `npm run dev`
+- สร้าง ZIP สำหรับอัปโหลด: `npm run package:hostinger`
+- ทดสอบ PHP: `npm run test:php`; ทดสอบ UI กับ Laravel: `npm run test:e2e`
+- Backend Express/PostgreSQL เดิมยังเก็บไว้สำหรับส่งออกข้อมูลและเทียบพฤติกรรม ใช้ `npm run dev:legacy` เฉพาะเมื่อต้องการรันรุ่นเดิม
+
+ส่วนด้านล่างเป็นเอกสาร demo รุ่นเดิม รายละเอียดการเก็บข้อมูล/คำสั่ง deploy เดิมให้ยึดคู่มือ Hostinger ด้านบนแทน
+
 # KTP Table — Restaurant POS Demo
 
 ต้นแบบใช้งานจริงตาม Restaurant POS System Scope v1.0 วันที่ 24 ตุลาคม 2026 พร้อม UI ภาษาไทย ข้อมูลจำลอง และ REST API ตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์

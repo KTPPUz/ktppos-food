@@ -1,0 +1,55 @@
+name: Laravel and MariaDB
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: ci-test-only
+          MARIADB_DATABASE: pos_food_test
+          MARIADB_USER: pos_food
+          MARIADB_PASSWORD: ci-test-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, pdo_sqlite
+          coverage: xdebug
+      - run: composer install --no-interaction --prefer-dist
+        working-directory: backend
+      - run: cp .env.example .env && php artisan key:generate
+        working-directory: backend
+      - run: php artisan test --coverage --min=85
+        working-directory: backend
+        env:
+          XDEBUG_MODE: coverage
+      - run: php artisan test
+        working-directory: backend
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: pos_food_test
+          DB_USERNAME: pos_food
+          DB_PASSWORD: ci-test-only
+      - run: vendor/bin/pint --test
+        working-directory: backend
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build:hostinger
