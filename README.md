@@ -116,11 +116,11 @@ E2E ใช้ Google Chrome ที่ติดตั้งในเครื่�
 
 ## ขอบเขตของรุ่นนี้
 
-นี่เป็น interactive mockup ที่มี demo backend ใช้ Express และ JSON repository เพื่อให้เปิดทดลองง่าย ยังไม่ได้ใช้ MySQL, NestJS หรือ WebSocket หน้าครัว poll ทุก 8 วินาที ข้อมูลตัวอย่างไม่ใช่ข้อมูลประกอบภาษี PIN แบบง่ายและ session ในหน่วยความจำมีไว้สำหรับ local demo เท่านั้น
+นี่เป็น interactive mockup ที่มี backend ใช้ Express รองรับ PostgreSQL + Prisma พร้อม migrations และนำเข้าข้อมูล JSON เดิม ดู [การตั้งค่าฐานข้อมูล](docs/DATABASE.md) หากไม่ตั้งฐานข้อมูลจะใช้ JSON demo เพื่อเปิดทดลองง่าย โหมด PostgreSQL เก็บ session พนักงานในฐานข้อมูล ส่วนโหมด JSON ใช้หน่วยความจำ ยังไม่ได้ใช้ MySQL, NestJS หรือ WebSocket หน้าครัว poll ทุก 8 วินาที ข้อมูลตัวอย่างไม่ใช่ข้อมูลประกอบภาษี และ PIN ยังเป็น demo
 
 ยังไม่เชื่อมเครื่องพิมพ์ POS, ลิ้นชักเงิน, QR ชำระจริง, payment gateway, delivery platform, e-Tax, บัญชี หรือรับประกัน offline/production หน้าใบเสร็จพิมพ์ผ่าน browser print มี mock receipt แทนเครื่องพิมพ์จริง
 
-ไฟล์ React/CSS และหน้าจอที่รันได้เป็นต้นแบบเทียบเท่า high-fidelity prototype ไม่มีไฟล์ Figma แยก คลังกลางแสดงผ่านการบริหารวัตถุดิบรวมของ HQ และการโอนระหว่างสาขา ยังไม่มี entity คลังกลางแยก, supplier CRUD, ใบสั่งซื้อ, คืนเงินบางส่วน หรือแก้ไขสูตรจาก UI หากต่อ production ต้องย้าย repository ไปฐานข้อมูลแบบ transactional, เพิ่ม password/identity จริง, durable idempotency, realtime, migrations และการทดสอบระดับ deployment
+ไฟล์ React/CSS และหน้าจอที่รันได้เป็นต้นแบบเทียบเท่า high-fidelity prototype ไม่มีไฟล์ Figma แยก คลังกลางแสดงผ่านการบริหารวัตถุดิบรวมของ HQ และการโอนระหว่างสาขา ยังไม่มี entity คลังกลางแยก, supplier CRUD, ใบสั่งซื้อ, คืนเงินบางส่วน หรือแก้ไขสูตรจาก UI โหมด PostgreSQL มี transactional repository และ durable QR idempotency แล้ว แต่ยังโหลดข้อมูลทั้งชุดและใช้ล็อกกลาง ก่อนต่อ production ต้องปรับ query/locking สำหรับโหลดจริง เพิ่ม password/identity จริง และทดสอบ backup/restore และ deployment
 
 ## ส่วนลดรายเมนูอาหาร
 

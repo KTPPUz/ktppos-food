@@ -8,7 +8,7 @@ const base='http://127.0.0.1:5192';
 let child,logs='';
 async function start(){
   logs='';
-  child=spawn(process.execPath,['server/index.mjs','--production'],{env:{...process.env,NODE_ENV:'production',PORT:'5192',HOST:'127.0.0.1',DATA_DIR:dataDir,TRUST_PROXY:'1',CUSTOMER_BASE_URL:'https://ktppuz.github.io/ktppos-food/',CORS_ALLOWED_ORIGINS:'https://ktppuz.github.io'},stdio:['ignore','pipe','pipe']});
+  child=spawn(process.execPath,['server/index.mjs','--production'],{env:{...process.env,STORAGE_DRIVER:'json',NODE_ENV:'production',PORT:'5192',HOST:'127.0.0.1',DATA_DIR:dataDir,TRUST_PROXY:'1',CUSTOMER_BASE_URL:'https://ktppuz.github.io/ktppos-food/',CORS_ALLOWED_ORIGINS:'https://ktppuz.github.io'},stdio:['ignore','pipe','pipe']});
   child.stdout.on('data',chunk=>logs+=chunk);child.stderr.on('data',chunk=>logs+=chunk);
   for(let i=0;i<60;i++){
     if(child.exitCode!==null)throw new Error('Production server exited: '+logs);

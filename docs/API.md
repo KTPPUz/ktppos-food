@@ -26,7 +26,9 @@ Base URL: `http://localhost:5173/api` JSON ทั้งหมด ใช้ `Auth
 | GET | `/inventory/movements` | Manager+; ประวัติรับเข้า/ขาย/คืน/โอน ที่กรองสิทธิ์ |
 | POST | `/transfers` | Owner/HQ / Enterprise; `{fromBranchId,toBranchId,ingredientId,qty}` |
 | POST | `/transfers/:id/approve` | Owner/HQ / Enterprise; อนุมัติครั้งเดียว |
-| PATCH | `/users/:id` | Owner/HQ; `{role}` เปลี่ยนเฉพาะพนักงาน tenant เดียวกัน เปลี่ยนตนเองไม่ได้ |
+| POST | `/users` | Owner; เพิ่ม `{name,email,role,branchId,pin}` เฉพาะร้านตนเอง |
+| PATCH | `/users/:id` | Owner; แก้ไขชื่อ อีเมล บทบาท สาขา หรือ PIN เฉพาะร้านตนเอง เปลี่ยนตนเองไม่ได้ |
+| DELETE | `/users/:id` | Owner; ลบทีมงานในร้านตนเอง ลบตนเองไม่ได้ และเก็บประวัติการทำรายการเดิม |
 | PATCH | `/settings` | Owner/HQ; `{taxRate,serviceRate}` ทั้งคู่ 0–30 |
 | POST | `/shifts` | ผู้มีสิทธิ์รายงาน; `{branchId,open}` ปิดเมื่อไม่มีบิลค้าง |
 | GET | `/reports/sales?branchId=...` | ผู้มีสิทธิ์รายงาน; `{orders,total,refund}` กรอง tenant/branch |
@@ -100,3 +102,9 @@ Small ชำระ draft ได้โดยตรง ไม่ผ่าน KDS �
 Order items เพิ่ม snapshot `originalUnitPrice` (รวมตัวเลือกเสริมก่อนลด) และ `menuDiscount` (ส่วนลดต่อหนึ่งจาน) ส่วน `unitPrice` เป็นราคาสุทธิหลังส่วนลดเมนู ยอด subtotal ใช้ unitPrice โดยไม่หัก menuDiscount ซ้ำ รายการเก่าที่ไม่มี field ใหม่ยังอ่านได้ตามปกติ
 
 Guest catalog คืน `price` เป็นราคาหลังลด พร้อม `originalPrice`, `discountAmount` และ `discount` เพื่อแสดงราคาเดิม/ราคาใหม่ตรงกับราคา POS
+
+## จัดการทีมงาน
+
+หน้า **ทีมงาน & สิทธิ์** มีปุ่มเพิ่ม แก้ไข และลบสำหรับ Owner เท่านั้น บทบาทอื่นที่มีสิทธิ์ `staff` ดูรายชื่อได้ อีเมลต้องไม่ซ้ำภายในร้าน (ไม่แยกตัวพิมพ์ใหญ่/เล็ก) สาขาต้องอยู่ในร้านเดียวกัน และ PIN ต้องเป็นตัวเลข 4–8 หลัก สำหรับ PATCH ให้ละ `pin` เพื่อคงค่าเดิม API ไม่คืน PIN ใน response และไม่บันทึก PIN ลง audit
+
+เมื่อเปลี่ยน PIN บทบาท หรือสาขา จะยกเลิก session เดิมทุกเครื่องของทีมงานคนนั้น การลบจะยกเลิก session และบัญชีเข้าสู่ระบบ แต่ยังเก็บบิลและ audit เดิมไว้ เจ้าของร้านแก้ไขหรือลบบัญชีที่กำลังใช้งานไม่ได้ มีการตรวจสิทธิ์ซ้ำที่ API ทั้งในโหมด JSON และ PostgreSQL

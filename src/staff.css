@@ -1,0 +1,8 @@
+.staff-actions,.staff-modal-actions{display:flex;align-items:center;gap:8px}
+.staff-actions{white-space:nowrap}
+.staff-actions button{padding:8px 12px;min-height:36px}
+.staff-modal-actions{justify-content:flex-end;margin-top:24px}
+.staff-fields{border:0;padding:0;margin:0;min-width:0}
+.staff-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.staff-panel .panel-heading{gap:16px;flex-wrap:wrap}
+@media(max-width:540px){.staff-form-grid{grid-template-columns:1fr;gap:0}.staff-panel .panel-heading>.primary{width:100%;justify-content:center}.staff-modal-actions button{flex:1;justify-content:center}}

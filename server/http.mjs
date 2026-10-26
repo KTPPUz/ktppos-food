@@ -15,7 +15,7 @@ export function configureHttp(app,{allowedOrigins=[],trustProxy=false}={}) {
     }
     if(origin) {
       res.set('Access-Control-Allow-Origin',origin);
-      res.set('Access-Control-Allow-Methods','GET,POST,PATCH,OPTIONS');
+      res.set('Access-Control-Allow-Methods','GET,POST,PATCH,DELETE,OPTIONS');
       res.set('Access-Control-Allow-Headers','Authorization,Content-Type');
     }
     res.set('Cache-Control','no-store');

@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String          @id
+  position  Int
+  payload   Json
+  branches  Branch[]
+  employees Employee[]
+  settings  TenantSettings?
+  overrides MenuOverride[]
+}
+
+model Branch {
+  id          String         @id
+  tenantId    String
+  tenant      Tenant         @relation(fields: [tenantId], references: [id])
+  position    Int
+  payload     Json
+  tables      DiningTable[]
+  orders      Order[]
+  ingredients Ingredient[]
+  shifts      Shift[]
+  sessions    TableSession[]
+
+  @@index([tenantId])
+}
+
+model Employee {
+  id       String        @id
+  tenantId String
+  tenant   Tenant        @relation(fields: [tenantId], references: [id])
+  position Int
+  payload  Json
+  sessions AuthSession[]
+
+  @@index([tenantId])
+}
+
+model MenuItem {
+  id        String         @id
+  position  Int
+  payload   Json
+  overrides MenuOverride[]
+  recipe    Recipe?
+}
+
+model MenuOverride {
+  tenantId String
+  menuId   String
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  menu     MenuItem @relation(fields: [menuId], references: [id])
+  payload  Json
+
+  @@id([tenantId, menuId])
+}
+
+model DiningTable {
+  id       String         @id
+  branchId String
+  branch   Branch         @relation(fields: [branchId], references: [id])
+  position Int
+  payload  Json
+  orders   Order[]
+  sessions TableSession[]
+
+  @@index([branchId])
+}
+
+model Order {
+  id         String         @id
+  number     Int            @unique
+  tenantId   String
+  branchId   String
+  branch     Branch         @relation(fields: [branchId], references: [id])
+  tableId    String?
+  table      DiningTable?   @relation(fields: [tableId], references: [id])
+  status     String
+  position   Int
+  hasBatches Boolean
+  payload    Json
+  items      OrderItem[]
+  batches    KitchenBatch[]
+
+  @@index([tenantId, branchId, status])
+}
+
+model OrderItem {
+  orderId   String
+  id        String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  position  Int
+  qty       Int
+  unitPrice Decimal @db.Decimal(14, 2)
+  payload   Json
+
+  @@id([orderId, id])
+}
+
+model KitchenBatch {
+  orderId  String
+  id       String
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  position Int
+  status   String
+  payload  Json
+
+  @@id([orderId, id])
+}
+
+model TableSession {
+  id          String            @id
+  branchId    String
+  branch      Branch            @relation(fields: [branchId], references: [id])
+  tableId     String
+  table       DiningTable       @relation(fields: [tableId], references: [id])
+  token       String            @unique
+  status      String
+  expiresAt   DateTime
+  position    Int
+  payload     Json
+  submissions GuestSubmission[]
+
+  @@index([tableId, status])
+}
+
+model GuestSubmission {
+  sessionId String
+  key       String
+  session   TableSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  position  Int
+  payload   Json
+
+  @@id([sessionId, key])
+}
+
+model Ingredient {
+  id       String  @id
+  branchId String
+  branch   Branch  @relation(fields: [branchId], references: [id])
+  position Int
+  stock    Decimal @db.Decimal(14, 2)
+  payload  Json
+
+  @@index([branchId])
+}
+
+model Recipe {
+  menuId   String   @id
+  menu     MenuItem @relation(fields: [menuId], references: [id])
+  position Int
+  payload  Json
+}
+
+model StockMovement {
+  id       String @id
+  tenantId String
+  branchId String
+  position Int
+  payload  Json
+
+  @@index([tenantId, branchId])
+}
+
+model StockTransfer {
+  id       String @id
+  tenantId String
+  branchId String
+  position Int
+  payload  Json
+
+  @@index([tenantId, branchId])
+}
+
+model Shift {
+  id       String @id
+  branchId String @unique
+  branch   Branch @relation(fields: [branchId], references: [id])
+  position Int
+  payload  Json
+}
+
+model TenantSettings {
+  tenantId String @id
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  position Int
+  payload  Json
+}
+
+model AuditEntry {
+  id       String @id
+  tenantId String
+  branchId String
+  position Int
+  payload  Json
+
+  @@index([tenantId, branchId])
+}
+
+model Counter {
+  id    String @id
+  value Int
+}
+
+model AuthSession {
+  tokenHash String   @id
+  userId    String
+  user      Employee @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

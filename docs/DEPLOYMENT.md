@@ -187,3 +187,7 @@ https://ktppuz.github.io/ktppos-food/#/order/TOKEN
 - ทดสอบ login, QR/hash route, reload, สั่งเข้าครัว และชำระเงินในสภาพแวดล้อมแยกดังกล่าว
 - Chrome: static build ที่ไม่มี API สามารถ login → ส่งครัว → ชำระเงิน → reload → ทดลอง QR ในอีกแท็บ และรีเซ็ต โดยไม่มี API request
 - ตรวจผล deploy ล่าสุดใน GitHub Actions และเปิด URL สาธารณะหลัง push ทุกครั้ง
+
+## ใช้ PostgreSQL แทน JSON demo
+
+Blueprint `render.yaml` ด้านบนยังเป็นทางเลือก JSON demo เดิม สำหรับ PostgreSQL ให้ทำตาม [คู่มือฐานข้อมูล](DATABASE.md): สร้าง PostgreSQL, ตั้ง `STORAGE_DRIVER=postgres` และ `DATABASE_URL` เป็น server secret, รัน `npm run db:generate` ระหว่าง build และ `npm run db:migrate` ก่อนเริ่มเซิร์ฟเวอร์ นำเข้า JSON ที่หยุดรับการแก้ไขแล้วด้วย `npm run db:import -- /path/to/demo.json` เพียงครั้งเดียว ไม่ต้องใช้ DATA_DIR หรือ disk สำหรับโหมดนี้ Session พนักงานเก็บในฐานข้อมูลแล้ว แต่ยังใช้ PIN demo และล็อกกลางตามข้อจำกัดในคู่มือ
