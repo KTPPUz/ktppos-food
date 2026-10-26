@@ -1,0 +1,23 @@
+.unpaid-bills{margin:18px 0 22px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.unpaid-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 18px 10px}
+.unpaid-heading>div{display:flex;align-items:center;gap:8px;color:#687b58}
+.unpaid-heading h2{font-size:14px;margin:0;color:var(--text,#303b30)}
+.unpaid-count{display:inline-flex;justify-content:center;align-items:center;min-width:22px;height:22px;border-radius:6px;background:#f7ecdf;color:#a07541;font-size:11px}
+.unpaid-heading>span{font-size:10px;color:#8b9581}.unpaid-heading>span strong{font-size:13px;color:#d86a4c;margin-left:6px}
+.unpaid-filters{display:flex;gap:6px;padding:0 18px 12px;flex-wrap:wrap}
+.unpaid-filters button{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:6px;font-size:10px;color:#87917c;background:#f6f7f3}
+.unpaid-filters button[aria-pressed=true]{color:#b75d40;background:#fff0e8;font-weight:600}
+.unpaid-list{margin:0;padding:0;list-style:none}
+.unpaid-bill{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid var(--line)}
+.unpaid-identity{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0;font-size:11px}
+.unpaid-open{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:#687b58}
+.unpaid-identity>span{overflow-wrap:anywhere}.unpaid-identity small{display:flex;align-items:center;gap:4px;flex-basis:100%;font-size:9px;color:#929b87}
+.unpaid-amount{font-size:12px;white-space:nowrap}
+.unpaid-pay{font-size:10px;gap:5px;padding:7px 10px;white-space:nowrap;min-height:34px}
+.unpaid-empty{margin:0;padding:17px 18px;border-top:1px solid var(--line);font-size:11px;color:#8b9581}
+@media(max-width:1100px){.unpaid-bill{grid-template-columns:minmax(0,1fr) auto;gap:8px}.unpaid-bill>.badge{justify-self:end}.unpaid-pay{justify-self:end}.unpaid-amount{font-size:13px}}
+@media(max-width:540px){.unpaid-heading{padding:14px 12px 10px}.unpaid-heading h2{font-size:12px}.unpaid-filters{padding-inline:12px}.unpaid-bill{padding:12px}.unpaid-heading>span{flex-basis:100%}}
+
+.unpaid-search{margin:4px 18px 12px;max-width:520px;width:calc(100% - 36px)}
+.unpaid-search input{min-width:0}
+@media(max-width:540px){.unpaid-search{margin-inline:12px;width:calc(100% - 24px)}}
