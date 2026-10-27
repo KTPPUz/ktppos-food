@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev-laravel.mjs",
     "build": "tsc --noEmit && vite build",
-    "start": "cd backend && php artisan serve --host=0.0.0.0 --port=5173",
+    "start": "cd backend && php -d upload_max_filesize=6M -d post_max_size=8M -S 0.0.0.0:5173 -t public dev-server.php",
     "test": "npm run test:php && npm run test:legacy",
     "test:e2e": "playwright test",
     "test:production": "node scripts/check-hostinger.mjs",

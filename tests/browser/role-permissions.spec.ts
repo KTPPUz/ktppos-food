@@ -1,0 +1,50 @@
+import {test,expect} from '@playwright/test';
+
+test('owner creates a role, assigns staff, changes live access and deletes the unused role',async({page,browser})=>{
+ await page.goto('/');await page.getByRole('button',{name:'เข้าสู่ร้านของคุณ'}).click();
+ const mobile=page.getByRole('button',{name:'เมนูหลัก',exact:true});if(await mobile.isVisible())await mobile.click();
+ await page.locator('nav').getByRole('button',{name:'ทีมงาน & สิทธิ์',exact:true}).click();
+ await page.getByRole('tab',{name:'บทบาทและสิทธิ์'}).click();
+ await page.locator('nav').getByRole('button',{name:'ตั้งค่าร้าน',exact:true}).click();
+ await expect(page.getByRole('tab',{name:'บทบาทและสิทธิ์'})).toHaveCount(0);
+ await page.locator('nav').getByRole('button',{name:'ทีมงาน & สิทธิ์',exact:true}).click();
+ const panel=page.getByRole('tabpanel',{name:'บทบาทและสิทธิ์'});
+ await panel.getByRole('button',{name:'เพิ่มบทบาท',exact:true}).click();
+ let dialog=page.getByRole('region',{name:'เพิ่มบทบาท',exact:true});
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+ await dialog.getByLabel('ชื่อบทบาท',{exact:true}).fill('ผู้ดูแลอาหารทดสอบ');
+ await dialog.getByRole('checkbox',{name:'เมนูอาหาร',exact:true}).check();
+ await dialog.getByRole('button',{name:'บันทึกบทบาท'}).click();await expect(dialog).toHaveCount(0);
+ const row=panel.getByRole('row').filter({hasText:'ผู้ดูแลอาหารทดสอบ'});await expect(row).toContainText('0 คน');
+ const ownerToken=await page.evaluate(()=>sessionStorage.getItem('bt-token'));
+ const ownerHeaders={Authorization:`Bearer ${ownerToken}`};
+ const role=(await (await page.request.get('/api/roles',{headers:ownerHeaders})).json()).find((r:any)=>r.name==='ผู้ดูแลอาหารทดสอบ');
+ await page.locator('nav').getByRole('button',{name:'ทีมงาน & สิทธิ์',exact:true}).click();
+ await page.getByRole('tab',{name:'ทีมงาน',exact:true}).click();
+ await page.getByRole('button',{name:'เพิ่มทีมงาน',exact:true}).click();dialog=page.getByRole('dialog',{name:'เพิ่มทีมงาน',exact:true});
+ await dialog.getByLabel('ชื่อทีมงาน',{exact:true}).fill('ผู้ดูแลเมนูใหม่');await dialog.getByLabel('อีเมล',{exact:true}).fill('custom-menu-role@example.test');
+ await dialog.getByRole('combobox',{name:'บทบาท',exact:true}).selectOption(role.key);await dialog.getByLabel('PIN เข้าสู่ระบบ',{exact:true}).fill('1234');
+ await dialog.getByRole('button',{name:'เพิ่มทีมงาน',exact:true}).click();await expect(dialog).toHaveCount(0);
+ const staffRow=page.getByRole('row').filter({hasText:'custom-menu-role@example.test'});await expect(staffRow).toContainText('ผู้ดูแลอาหารทดสอบ');
+ const staffContext=await browser.newContext();const staff=await staffContext.newPage();
+ try{
+  await staff.goto('/');await staff.locator('#account').selectOption({label:'ผู้ดูแลเมนูใหม่ · ผู้ดูแลอาหารทดสอบ'});await staff.getByRole('button',{name:'เข้าสู่ร้านของคุณ'}).click();
+  await expect(staff.locator('.sidebar nav button')).toHaveCount(1);await expect(staff.locator('.sidebar nav button')).toHaveText('เมนูอาหาร');
+  await expect(staff.locator('h1,h2').filter({hasText:'เมนูอาหาร'})).toBeVisible();
+  const token=await staff.evaluate(()=>sessionStorage.getItem('bt-token'));
+  const forbidden=await staff.request.post('/api/orders',{headers:{Authorization:`Bearer ${token}`},data:{branchId:'r1',items:[]}});expect(forbidden.status()).toBe(403);
+  await page.locator('nav').getByRole('button',{name:'ทีมงาน & สิทธิ์',exact:true}).click();await page.getByRole('tab',{name:'บทบาทและสิทธิ์'}).click();
+  await expect(panel.getByRole('button',{name:'ลบบทบาท ผู้ดูแลอาหารทดสอบ',exact:true})).toBeDisabled();
+  await panel.getByRole('button',{name:'แก้ไขบทบาท ผู้ดูแลอาหารทดสอบ',exact:true}).click();dialog=page.getByRole('region',{name:'แก้ไขบทบาท',exact:true});
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await dialog.getByRole('checkbox',{name:'เมนูอาหาร',exact:true}).uncheck();await dialog.getByRole('button',{name:'บันทึกบทบาท'}).click();await expect(dialog).toHaveCount(0);
+  await expect(staff.locator('.sidebar nav button')).toHaveCount(0,{timeout:15000});await expect(staff.getByText('ยังไม่ได้รับสิทธิ์เข้าถึงเมนู กรุณาติดต่อเจ้าของร้าน')).toBeVisible();
+  await staff.locator('.brand').click();await expect(staff.getByText('ยังไม่ได้รับสิทธิ์เข้าถึงเมนู กรุณาติดต่อเจ้าของร้าน')).toBeVisible();
+  await page.locator('nav').getByRole('button',{name:'ทีมงาน & สิทธิ์',exact:true}).click();
+  await page.getByRole('tab',{name:'ทีมงาน',exact:true}).click();
+  await staffRow.getByRole('button',{name:'ลบ ผู้ดูแลเมนูใหม่',exact:true}).click();await page.getByRole('button',{name:'ยืนยันลบทีมงาน',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.locator('nav').getByRole('button',{name:'ทีมงาน & สิทธิ์',exact:true}).click();await page.getByRole('tab',{name:'บทบาทและสิทธิ์'}).click();
+  await panel.getByRole('button',{name:'ลบบทบาท ผู้ดูแลอาหารทดสอบ',exact:true}).click();await page.getByRole('button',{name:'ยืนยันลบบทบาท',exact:true}).click();await expect(page.getByRole('dialog')).toHaveCount(0);await expect(row).toHaveCount(0);
+  await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ }finally{await staffContext.close();}
+});

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Branch;
 use App\Models\Employee;
 use App\Models\PosOrder;
 use App\Models\PosRecord;
+use App\Models\RoleDefinition;
 use App\Models\TableSession;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +17,7 @@ use RuntimeException;
 final class PosRepository
 {
     public const TABLES = [
-        'tenants' => 'tenants', 'branches' => 'branches', 'users' => 'employees',
+        'tenants' => 'tenants', 'roles' => 'roles', 'branches' => 'branches', 'users' => 'employees',
         'menu' => 'menu_items', 'tables' => 'dining_tables', 'ingredients' => 'ingredients',
         'recipes' => 'recipes', 'shifts' => 'shifts', 'settings' => 'tenant_settings',
         'orders' => 'pos_orders', 'tableSessions' => 'table_sessions',
@@ -25,7 +27,9 @@ final class PosRepository
     private function model(string $table): PosRecord
     {
         return match ($table) {
+            'branches' => new Branch,
             'employees' => new Employee,
+            'roles' => new RoleDefinition,
             'pos_orders' => new PosOrder,
             'table_sessions' => new TableSession,
             default => (new PosRecord)->setTable($table),
@@ -79,7 +83,11 @@ final class PosRepository
             foreach ($data[$key] ?? [] as $position => $payload) {
                 $id = $payload['id'] ?? $payload['menuId'] ?? $payload['tenantId'];
                 $row = ['id' => $id, 'position' => $position];
-                if (isset($payload['tenantId'])) {
+                if ($key === 'roles') {
+                    $row['role_key'] = $payload['key'];
+                    $row['name'] = $payload['name'];
+                }
+                if (isset($payload['tenantId']) && $key !== 'menu') {
                     $row['tenant_id'] = $payload['tenantId'];
                 }
                 if (isset($payload['branchId'])) {
@@ -150,19 +158,19 @@ final class PosRepository
         DB::table('pos_counters')->where('id', 'state')->update(['value' => $after['nextOrder'], 'initialized' => true]);
     }
 
-    public function transaction(callable $callback): mixed
+    public function transaction(callable $callback, int $attempts = 3): mixed
     {
         return DB::transaction(function () use ($callback): mixed {
             DB::table('pos_counters')->where('id', 'state')->lockForUpdate()->firstOrFail();
 
             return $callback();
-        }, 3);
+        }, $attempts);
     }
 
     public function initialize(array $data): void
     {
         foreach (self::TABLES as $key => $table) {
-            if ($key !== 'tableSessions' && ! is_array($data[$key] ?? null)) {
+            if (! in_array($key, ['tableSessions', 'roles'], true) && ! is_array($data[$key] ?? null)) {
                 throw new RuntimeException("Invalid source collection: {$key}");
             }
         }
@@ -171,7 +179,11 @@ final class PosRepository
             throw new RuntimeException('Invalid nextOrder counter.');
         }
         $data['tableSessions'] ??= [];
+        $data['roles'] ??= array_merge(...array_map(fn ($tenant) => RoleCatalog::defaults($tenant['id']), $data['tenants']));
         foreach ($data['users'] as &$user) {
+            if (! array_filter($data['roles'], fn ($role) => $role['tenantId'] === $user['tenantId'] && $role['key'] === $user['role'])) {
+                throw new RuntimeException('Employee references an unknown role.');
+            }
             $user['email'] = mb_strtolower($user['email']);
             if (isset($user['pin'])) {
                 $user['pinHash'] = Hash::make((string) $user['pin']);

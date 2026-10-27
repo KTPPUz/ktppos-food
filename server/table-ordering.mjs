@@ -1,3 +1,4 @@
+import {kitchenStatus,needsService,serviceOpen} from '../shared/order-flow.mjs';
 import {menuPrice} from '../shared/pricing.mjs';
 import {assert,totals,scope,requireOpen} from './domain.mjs';
 const terminal = new Set(['paid','refunded','cancelled','merged','split']);
@@ -19,10 +20,10 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
     return {id:s.id,tableId:s.tableId,branchId:s.branchId,orderIds:s.orderIds,active:isActive(s),acceptingOrders:isActive(s)&&s.acceptingOrders,expiresAt:s.expiresAt};
   }
   function syncBatches(o) {
-    if(terminal.has(o.status)||!o.kitchenBatches?.length)return;
+    if((terminal.has(o.status)&&o.status!=='paid')||!o.kitchenBatches?.length)return;
     const live=o.kitchenBatches.filter(b=>b.status!=='cancelled');
     if(!live.length)return;
-    o.status=['pending','cooking','ready','served'].find(status=>live.some(b=>b.status===status))||'pending';
+    const status=['pending','cooking','ready','served'].find(status=>live.some(b=>b.status===status))||'pending';if(o.status==='paid')o.kitchenStatus=status;else o.status=status;
   }
   function ensureBatches(o) {
     o.kitchenBatches ??= [];
@@ -46,7 +47,7 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
     for(const s of orderSessions(o)) {
       if(s.status!=='active')continue;
       s.acceptingOrders=false;
-      if(s.orderIds.every(id=>terminal.has(data.orders.find(x=>x.id===id)?.status)))closeSession(s,'รอบบริการนี้สิ้นสุดแล้ว กรุณาขอ QR ใหม่จากพนักงาน');
+      if(s.orderIds.every(id=>!serviceOpen(data.orders.find(x=>x.id===id)||{status:'cancelled'})))closeSession(s,'รอบบริการนี้สิ้นสุดแล้ว กรุณาขอ QR ใหม่จากพนักงาน');
     }
   }
   function onSplit(o,child) {
@@ -69,7 +70,7 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
     assert(tenant?.plan!=='Small','ร้านนี้ยังไม่เปิดรับออเดอร์ผ่าน QR',403);
     return s;
   }
-  function serializeOrders(s) {return s.orderIds.map(id=>data.orders.find(o=>o.id===id)).filter(Boolean).map(o=>({id:o.id,number:o.number,status:o.status,items:o.items.map(i=>({id:i.id,menuId:i.menuId,name:i.name,qty:i.qty,unitPrice:i.unitPrice,originalUnitPrice:i.originalUnitPrice,menuDiscount:i.menuDiscount,modifiers:i.modifiers,note:i.note,status:o.kitchenBatches?.length?(i.status||o.status):o.status})),totals:o.totals||totals(o),createdAt:o.createdAt,roundingAdjustment:o.roundingAdjustment||0,kitchenBatches:(o.kitchenBatches||[]).map(b=>({id:b.id,round:b.round,source:b.source,status:b.status,createdAt:b.createdAt,itemIds:b.itemIds}))}));}
+  function serializeOrders(s) {return s.orderIds.map(id=>data.orders.find(o=>o.id===id)).filter(Boolean).map(o=>({id:o.id,number:o.number,status:o.status,kitchenStatus:kitchenStatus(o),items:o.items.map(i=>({id:i.id,menuId:i.menuId,name:i.name,qty:i.qty,unitPrice:i.unitPrice,originalUnitPrice:i.originalUnitPrice,menuDiscount:i.menuDiscount,modifiers:i.modifiers,note:i.note,status:o.kitchenBatches?.length?(i.status||kitchenStatus(o)):kitchenStatus(o)})),totals:o.totals||totals(o),createdAt:o.createdAt,roundingAdjustment:o.roundingAdjustment||0,kitchenBatches:(o.kitchenBatches||[]).map(b=>({id:b.id,round:b.round,source:b.source,status:b.status,createdAt:b.createdAt,itemIds:b.itemIds}))}));}
   function guestState(s) {
     const tenant=data.tenants.find(t=>t.id===s.tenantId),branch=data.branches.find(b=>b.id===s.branchId),table=data.tables.find(t=>t.id===s.tableId);
     const active=isActive(s),shift=data.shifts.find(x=>x.branchId===s.branchId);
@@ -121,12 +122,12 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
       assert(data.shifts.find(x=>x.branchId===t.branchId)?.open,'กรุณาเปิดกะก่อนเปิด QR',409);
       let s=sessionForTable(t.id);
       if(!s){
-        const orders=data.orders.filter(o=>o.tableId===t.id&&!terminal.has(o.status));
+        const orders=data.orders.filter(o=>o.tableId===t.id&&serviceOpen(o));
         // A partially settled split round cannot be reopened using a new QR.
-        const unsettled=data.tableSessions.find(s=>s.tableId===t.id&&s.status==='active'&&!s.acceptingOrders&&s.orderIds.some(id=>{const o=data.orders.find(o=>o.id===id);return o&&!terminal.has(o.status);}));
+        const unsettled=data.tableSessions.find(s=>s.tableId===t.id&&s.status==='active'&&!s.acceptingOrders&&s.orderIds.some(id=>{const o=data.orders.find(o=>o.id===id);return o&&serviceOpen(o);}));
         assert(!unsettled,'กรุณาปิดบิลที่แยกไว้ให้ครบก่อนเปิด QR ใหม่',409);
         for(const old of data.tableSessions.filter(s=>s.tableId===t.id&&s.status==='active'))closeSession(old,'QR เดิมหมดอายุและถูกแทนที่แล้ว');
-        s={id:uid(),token:randomToken(),tenantId:u.tenantId,branchId:t.branchId,tableId:t.id,status:'active',acceptingOrders:true,orderIds:orders.map(o=>o.id),submissions:[],createdAt:now(),createdBy:u.id,expiresAt:new Date(Date.now()+12*3600000).toISOString()};
+        s={id:uid(),token:randomToken(),tenantId:u.tenantId,branchId:t.branchId,tableId:t.id,status:'active',acceptingOrders:!orders.some(o=>o.status==='paid'),orderIds:orders.map(o=>o.id),submissions:[],createdAt:now(),createdBy:u.id,expiresAt:new Date(Date.now()+12*3600000).toISOString()};
         for(const o of orders)o.serviceSessionId=s.id;
         data.tableSessions.push(s);audit(u,'เปิด QR สั่งอาหาร',`${t.name} · รอบ ${s.id}`,t.branchId);persist();
       }
@@ -135,16 +136,16 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
     app.post('/api/table-sessions/:id/close',(req,res)=>{
       const u=req.user;allowed(u,'tables');feature(u,'medium');
       const s=data.tableSessions.find(s=>s.id===req.params.id&&scope(u,s));assert(s,'ไม่พบรอบโต๊ะ',404);
-      assert(s.orderIds.every(id=>terminal.has(data.orders.find(o=>o.id===id)?.status)),'ยังมีบิลค้าง กรุณาชำระหรือยกเลิกบิลก่อนปิดรอบ',409);
+      assert(s.orderIds.every(id=>!serviceOpen(data.orders.find(o=>o.id===id)||{status:'cancelled'})),'ยังมีบิลค้าง กรุณาชำระหรือยกเลิกบิลก่อนปิดรอบ',409);
       closeSession(s,'พนักงานปิดรอบบริการแล้ว กรุณาขอ QR ใหม่');audit(u,'ปิด QR สั่งอาหาร',s.tableId,s.branchId);persist();res.json({ok:true});
     });
     app.patch('/api/orders/:id/kitchen-batches/:batchId/status',(req,res)=>{
-      const u=req.user;feature(u,'medium');const o=getOrder(u,req.params.id);requireOpen(o);
+      const u=req.user;feature(u,'medium');const o=getOrder(u,req.params.id);if(!(o.status==='paid'&&needsService(o)))requireOpen(o);
       const b=o.kitchenBatches?.find(b=>b.id===req.params.batchId);assert(b,'ไม่พบรอบครัว',404);
       const next={pending:'cooking',cooking:'ready',ready:'served'}[b.status];assert(next===req.body.status,'สถานะรอบครัวไม่ถูกต้อง',409);
       allowed(u,next==='served'?'tables':'kitchen');b.status=next;
       for(const item of o.items.filter(i=>b.itemIds.includes(i.id)))item.status=next;
-      syncBatches(o);audit(u,'สถานะรอบครัว',`#${o.number} · รอบ ${b.round} → ${next}`,o.branchId);persist();res.json(o);
+      syncBatches(o);if(o.status==='paid')onOrderClosed(o);audit(u,'สถานะรอบครัว',`#${o.number} · รอบ ${b.round} → ${next}`,o.branchId);persist();res.json(o);
     });
   }
   return {registerPublic,registerStaff,sessionSummary,isActive,sessionForTable,attachStaffOrder,addBatch,ensureBatches,syncBatches,onOrderClosed,onSplit,revokeForOrder,cancelItem};

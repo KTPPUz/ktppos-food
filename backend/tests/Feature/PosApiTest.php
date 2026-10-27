@@ -78,15 +78,15 @@ final class PosApiTest extends TestCase
             $this->api('PATCH', '/orders/'.$order['id'].'/status', compact('status'), $this->owner)->assertOk();
         }
         $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'cash', 'received' => 200], $this->owner)->assertOk()->assertJsonPath('payment.change', 45.92);
-        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'qr'], $this->owner)->assertStatus(409);
+        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'cash', 'received' => 100000], $this->owner)->assertStatus(409);
         $this->api('GET', '/reports/sales', [], $this->owner)->assertOk()->assertJsonPath('total', 154.08)->assertJsonCount(1, 'orders');
     }
 
     public function test_tenant_branch_plan_and_role_guards(): void
     {
         $order = $this->order();
-        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'qr'], $this->brand)->assertNotFound();
-        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'qr'], $this->login('restaurant-u3'))->assertForbidden();
+        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'cash', 'received' => 100000], $this->brand)->assertNotFound();
+        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'cash', 'received' => 100000], $this->login('restaurant-u3'))->assertForbidden();
         $this->api('POST', '/orders', ['branchId' => 'r1'], $this->login('restaurant-u4'))->assertForbidden();
         $this->api('POST', '/tables/c1-t15/session', [], $this->login('cafe-u0'))->assertForbidden();
         $this->api('POST', '/orders', ['branchId' => 'b1'], $this->owner)->assertForbidden();
@@ -123,9 +123,13 @@ final class PosApiTest extends TestCase
         foreach (['cooking', 'ready', 'served'] as $status) {
             $this->api('PATCH', '/orders/'.$first['orderId'].'/kitchen-batches/'.$first['batchId'].'/status', compact('status'), $this->owner)->assertOk();
         }
-        $this->guestOrder($session['token'], 'laravel-qr-request-00002')->assertCreated()->assertJsonCount(2, 'orders.0.kitchenBatches')->assertJsonPath('orders.0.kitchenBatches.0.status', 'served');
+        $second = $this->guestOrder($session['token'], 'laravel-qr-request-00002')->assertCreated()->assertJsonCount(2, 'orders.0.kitchenBatches')->assertJsonPath('orders.0.kitchenBatches.0.status', 'served')->json();
         $this->api('POST', '/table-sessions/'.$session['id'].'/close', [], $this->owner)->assertStatus(409);
-        $this->api('POST', '/orders/'.$first['orderId'].'/payments', ['method' => 'qr'], $this->owner)->assertOk();
+        $this->api('POST', '/orders/'.$first['orderId'].'/payments', ['method' => 'cash', 'received' => 100000], $this->owner)->assertOk();
+        $this->guestOrder($session['token'], 'laravel-qr-request-00003')->assertStatus(409);
+        foreach (['cooking', 'ready', 'served'] as $status) {
+            $this->api('PATCH', '/orders/'.$first['orderId'].'/kitchen-batches/'.$second['batchId'].'/status', compact('status'), $this->owner)->assertOk()->assertJsonPath('status', 'paid');
+        }
         $this->guestOrder($session['token'], 'laravel-qr-request-00003')->assertStatus(410);
         $this->api('GET', '/guest/'.$session['token'])->assertJsonPath('session.active', false)->assertJsonCount(0, 'menu');
         $this->assertNotSame($session['token'], $this->qr()['token']);
@@ -183,7 +187,7 @@ final class PosApiTest extends TestCase
         $this->api('POST', "/orders/{$id}/move", ['tableId' => 'r1-t11'], $this->owner)->assertOk()->assertJsonPath('tableId', 'r1-t11');
         $merged = $this->api('POST', '/orders/'.$split['split']['id'].'/merge', ['targetId' => $id], $this->owner)->assertOk()->json();
         $this->assertCount(3, $merged['items']);
-        $this->api('POST', "/orders/{$id}/payments", ['method' => 'qr'], $this->owner)->assertOk();
+        $this->api('POST', "/orders/{$id}/payments", ['method' => 'cash', 'received' => 100000], $this->owner)->assertOk();
         $this->api('POST', "/orders/{$id}/refund", ['reason' => 'คืนเงินทดสอบ'], $this->owner)->assertOk()->assertJsonPath('status', 'refunded');
         $this->api('POST', "/orders/{$id}/refund", ['reason' => 'คืนเงินซ้ำ'], $this->owner)->assertStatus(409);
         $cancel = $this->order();
@@ -208,7 +212,7 @@ final class PosApiTest extends TestCase
         $this->api('POST', '/inventory/adjust', ['ingredientId' => 'b1-i1', 'qty' => -8, 'reason' => 'ทดสอบหมด'], $this->brand)->assertOk();
         $order = $this->order(['branchId' => 'b1', 'items' => [['menuId' => 'm1', 'qty' => 1], ['menuId' => 'm2', 'qty' => 1]]], $this->brand);
         $before = $stock('b1-i0');
-        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'qr'], $this->brand)->assertStatus(409);
+        $this->api('POST', '/orders/'.$order['id'].'/payments', ['method' => 'cash', 'received' => 100000], $this->brand)->assertStatus(409);
         $this->assertSame($before, $stock('b1-i0'));
         $this->assertSame('draft', PosOrder::find($order['id'])->payload['status']);
     }
@@ -221,7 +225,7 @@ final class PosApiTest extends TestCase
         $second = $this->guestOrder($b['token'])->assertCreated()->json();
         $split = $this->api('POST', '/orders/'.$first['orderId'].'/split', ['selected' => [$first['orders'][0]['items'][0]['id'] => 1]], $this->owner)->assertOk()->json();
         $this->guestOrder($a['token'], 'split-qr-request-00002')->assertStatus(409);
-        $this->api('POST', '/orders/'.$split['split']['id'].'/payments', ['method' => 'qr'], $this->owner)->assertOk();
+        $this->api('POST', '/orders/'.$split['split']['id'].'/payments', ['method' => 'cash', 'received' => 100000], $this->owner)->assertOk();
         $this->api('POST', '/orders/'.$first['orderId'].'/merge', ['targetId' => $second['orderId']], $this->owner)->assertOk();
         $this->api('GET', '/guest/'.$a['token'])->assertJsonPath('session.active', false);
         $this->api('POST', '/orders/'.$second['orderId'].'/move', ['tableId' => 'r1-t14'], $this->owner)->assertOk();
@@ -261,5 +265,47 @@ final class PosApiTest extends TestCase
         $this->api('GET', '/unknown')->assertUnauthorized();
         $this->api('GET', '/unknown', [], $this->owner)->assertNotFound();
         $this->artisan('pos:seed')->assertFailed();
+    }
+
+    public function test_table_settings_preserve_live_bill_reservation_and_qr(): void
+    {
+        $session = $this->qr('r1-t1');
+        $before = DB::table('dining_tables')->where('id', 'r1-t1')->value('payload');
+        $orders = PosOrder::count();
+        $reservation = ['name' => 'ลูกค้าจอง', 'time' => '18:00'];
+        $this->api('PATCH', '/tables/r1-t1/reservation', ['reservation' => $reservation], $this->owner)->assertOk();
+        $this->api('PATCH', '/tables/r1-t1', ['name' => ' ริมหน้าต่าง 1 ', 'seats' => 6], $this->owner)->assertOk()
+            ->assertJsonPath('id', 'r1-t1')->assertJsonPath('name', 'ริมหน้าต่าง 1')->assertJsonPath('seats', 6)->assertJsonPath('reservation', $reservation);
+        $this->api('GET', '/guest/'.$session['token'])->assertOk()->assertJsonPath('restaurant.table', 'ริมหน้าต่าง 1')->assertJsonPath('restaurant.seats', 6);
+        $this->assertSame($orders, PosOrder::count());
+        $this->assertSame($session['token'], $this->qr('r1-t1')['token']);
+        $state = $this->api('GET', '/state', [], $this->owner)->assertOk()->json();
+        $this->assertNotEmpty(array_filter($state['audit'], fn ($entry) => $entry['action'] === 'แก้ไขข้อมูลโต๊ะ' && $entry['branchId'] === 'r1'));
+        $this->assertNotSame($before, DB::table('dining_tables')->where('id', 'r1-t1')->value('payload'));
+    }
+
+    public function test_invalid_table_updates_are_atomic_and_names_are_unique_per_branch(): void
+    {
+        $before = DB::table('dining_tables')->where('id', 'r1-t1')->value('payload');
+        foreach ([[], ['name' => ' '], ['name' => str_repeat('a', 51)], ['seats' => 0], ['seats' => 51], ['seats' => 2.5], ['seats' => '4'], ['name' => 'New', 'branchId' => 'b1'], ['name' => 'New', 'seats' => 0]] as $body) {
+            $this->api('PATCH', '/tables/r1-t1', $body, $this->owner)->assertStatus(400);
+            $this->assertSame($before, DB::table('dining_tables')->where('id', 'r1-t1')->value('payload'));
+        }
+        $this->api('PATCH', '/tables/r1-t1', ['name' => ' t02 '], $this->owner)->assertStatus(409);
+        $this->api('PATCH', '/tables/r1-t1', ['seats' => 8], $this->owner)->assertOk()->assertJsonPath('name', 'T01')->assertJsonPath('seats', 8);
+        $this->api('PATCH', '/tables/b1-t1', ['name' => 'ชื่อเดียวกัน'], $this->brand)->assertOk();
+        $this->api('PATCH', '/tables/b2-t1', ['name' => 'ชื่อเดียวกัน'], $this->brand)->assertOk();
+    }
+
+    public function test_table_settings_enforce_settings_permission_tenant_and_plan(): void
+    {
+        $this->api('PATCH', '/tables/r1-t1', ['name' => 'Test'])->assertUnauthorized();
+        foreach (['restaurant-u1', 'restaurant-u2', 'restaurant-u3', 'restaurant-u4'] as $user) {
+            $this->api('PATCH', '/tables/r1-t1', ['name' => 'Test'], $this->login($user))->assertForbidden();
+        }
+        $this->api('PATCH', '/tables/b1-t1', ['name' => 'Test'], $this->owner)->assertNotFound();
+        $this->api('PATCH', '/tables/missing', ['name' => 'Test'], $this->owner)->assertNotFound();
+        $this->api('PATCH', '/tables/c1-t1', ['name' => 'Test'], $this->login('cafe-u0'))->assertForbidden();
+        $this->api('PATCH', '/tables/b2-t1', ['name' => 'โต๊ะสาขาสอง', 'seats' => 10], $this->brand)->assertOk()->assertJsonPath('branchId', 'b2');
     }
 }

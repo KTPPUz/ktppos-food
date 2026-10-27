@@ -41,7 +41,12 @@ trait OrderActions
         if ($action === 'refund' && $method === 'POST') {
             return $this->refund($order, $body);
         }
-        $this->open($order);
+        $paidServiceUpdate = $order['status'] === 'paid' && OrderFlow::needsService($order)
+            && $method === 'PATCH'
+            && (($action === 'status' && ($body['status'] ?? '') !== 'cancelled') || preg_match('#^kitchen-batches/[^/]+/status$#D', $action));
+        if (! $paidServiceUpdate) {
+            $this->open($order);
+        }
         if ($action === 'items' && $method === 'POST') {
             $this->allowed('pos');
             $items = $this->parseItems($this->user['tenantId'], $order['branchId'], $body['items'] ?? null);
@@ -81,6 +86,7 @@ trait OrderActions
             $this->audit('ให้ส่วนลด', '#'.$order['number'].' · ฿'.$amount, $order['branchId']);
         } elseif ($action === 'status' && $method === 'PATCH') {
             $status = $body['status'] ?? '';
+            $previousKitchenStatus = OrderFlow::kitchenStatus($order);
             if ($status === 'cancelled') {
                 $this->allowed('refund');
                 $this->reason($body);
@@ -89,15 +95,19 @@ trait OrderActions
                 $order['cancelledAt'] = $this->now();
             } else {
                 $this->feature();
-                $this->check((['draft' => 'pending', 'pending' => 'cooking', 'cooking' => 'ready', 'ready' => 'served'][$order['status']] ?? null) === $status, 'เปลี่ยนสถานะตามลำดับเท่านั้น', 409);
+                $this->check((['draft' => 'pending', 'pending' => 'cooking', 'cooking' => 'ready', 'ready' => 'served'][OrderFlow::kitchenStatus($order)] ?? null) === $status, 'เปลี่ยนสถานะตามลำดับเท่านั้น', 409);
                 $this->allowed($status === 'pending' ? 'pos' : ($status === 'served' ? 'tables' : 'kitchen'));
             }
-            $order['status'] = $status;
+            if ($order['status'] === 'paid') {
+                $order['kitchenStatus'] = $status;
+            } else {
+                $order['status'] = $status;
+            }
             if ($status === 'cancelled') {
                 $this->onClosed($order);
             } elseif (! empty($order['kitchenBatches'])) {
                 foreach ($order['kitchenBatches'] as &$batch) {
-                    if (! in_array($batch['status'], ['served', 'cancelled'], true)) {
+                    if (! in_array($batch['status'], ['served', 'cancelled'], true) && ($order['status'] !== 'paid' || $batch['status'] === $previousKitchenStatus)) {
                         $batch['status'] = $status;
                         foreach ($order['items'] as &$item) {
                             if (in_array($item['id'], $batch['itemIds'], true)) {
@@ -109,6 +119,11 @@ trait OrderActions
                 }
                 unset($batch);
                 $this->syncBatches($order);
+            } else {
+                foreach ($order['items'] as &$item) {
+                    $item['status'] = $status;
+                }
+                unset($item);
             }
             $this->audit($status === 'cancelled' ? 'ยกเลิกออเดอร์' : 'สถานะครัว', '#'.$order['number'].' → '.$status.(! empty($body['reason']) ? ' · '.$body['reason'] : ''), $order['branchId']);
         } elseif (preg_match('#^kitchen-batches/([^/]+)/status$#D', $action, $m) && $method === 'PATCH') {
@@ -181,6 +196,10 @@ trait OrderActions
             throw new ApiError('ไม่พบ API', 404);
         }
 
+        if ($order['status'] === 'paid') {
+            $this->onClosed($order);
+        }
+
         return $order;
     }
 
@@ -200,6 +219,12 @@ trait OrderActions
     {
         $this->allowed('pay');
         $this->check(in_array($body['method'] ?? null, ['cash', 'qr', 'card'], true), 'วิธีชำระเงินไม่ถูกต้อง');
+        if ($body['method'] === 'qr') {
+            $config = $this->branch($order['branchId'])['paymentQr'] ?? [];
+            $this->check(! empty($config['enabled']) && ! empty($config['image']), 'สาขานี้ยังไม่ได้เปิดใช้ QR รับชำระเงิน', 409);
+            $this->check(($body['verified'] ?? false) === true, 'กรุณาตรวจสอบเงินเข้าบัญชีและยืนยันก่อนรับชำระ');
+            $this->check(is_string($body['qrVersion'] ?? null) && $body['qrVersion'] === ($config['version'] ?? null), 'ข้อมูล QR มีการเปลี่ยนแปลง กรุณารีเฟรชและตรวจสอบบัญชีอีกครั้ง', 409);
+        }
         $sum = $this->totals($order);
         $received = $body['method'] === 'cash' ? $this->number($body['received'] ?? null) : $sum['total'];
         $this->check($received >= $sum['total'], 'เงินสดที่รับไม่เพียงพอ');
@@ -221,13 +246,18 @@ trait OrderActions
             $ingredient['stock'] = $this->money($ingredient['stock'] - $qty);
             $this->data['movements'][] = ['id' => $this->uid(), 'tenantId' => $this->user['tenantId'], 'branchId' => $order['branchId'], 'ingredientId' => $id, 'qty' => -$qty, 'reason' => 'ขาย #'.$order['number'], 'userId' => $this->user['id'], 'at' => $this->now()];
         }
+        // Payment settles the bill; kitchen work continues independently.
+        $order['kitchenStatus'] = $this->plan() === 'Small' ? 'served' : ($order['status'] === 'draft' ? 'pending' : $order['status']);
         $order['status'] = 'paid';
         $order['totals'] = $sum;
         $order['paidAt'] = $this->now();
         $order['receipt'] = 'BT-'.$order['number'];
         $order['payment'] = ['method' => $body['method'], 'received' => $received, 'change' => $body['method'] === 'cash' ? $this->money($received - $sum['total']) : 0];
+        if ($body['method'] === 'qr') {
+            $order['payment'] = [...$order['payment'], 'verification' => 'manual', 'verifiedBy' => $this->user['id'], 'verifiedAt' => $this->now(), 'account' => array_intersect_key($config, array_flip(['bankName', 'accountName', 'accountNumber']))];
+        }
         $this->onClosed($order);
-        $this->audit('ชำระเงินจำลอง', '#'.$order['number'].' · ฿'.$sum['total'].' · '.$body['method'], $order['branchId']);
+        $this->audit($body['method'] === 'qr' ? 'รับโอนเงินผ่าน QR (ตรวจสอบเอง)' : 'ชำระเงินจำลอง', '#'.$order['number'].' · ฿'.$sum['total'].' · '.$body['method'], $order['branchId']);
 
         return $order;
     }
@@ -244,6 +274,7 @@ trait OrderActions
             $ingredient['stock'] = $this->money($ingredient['stock'] - $movement['qty']);
             $this->data['movements'][] = [...$movement, 'id' => $this->uid(), 'qty' => -$movement['qty'], 'reason' => 'คืนเงิน #'.$order['number'], 'userId' => $this->user['id'], 'at' => $this->now()];
         }
+        $this->onClosed($order);
         $this->audit('คืนเงินจำลอง', '#'.$order['number'].' · '.$body['reason'], $order['branchId']);
 
         return $order;
@@ -345,14 +376,14 @@ trait OrderActions
                 if (! $old['acceptingOrders']) {
                     foreach ($old['orderIds'] as $orderId) {
                         $o = $this->first('orders', fn ($o) => $o['id'] === $orderId);
-                        $this->check(! $o || in_array($o['status'], self::CLOSED, true), 'กรุณาปิดบิลที่แยกไว้ให้ครบก่อนเปิด QR ใหม่', 409);
+                        $this->check(! $o || ! OrderFlow::serviceOpen($o), 'กรุณาปิดบิลที่แยกไว้ให้ครบก่อนเปิด QR ใหม่', 409);
                     }
                 }
                 $this->closeSession($old, 'QR เดิมหมดอายุและถูกแทนที่แล้ว');
             }
             unset($old);
-            $orders = $this->list('orders', fn ($o) => ($o['tableId'] ?? null) === $id && ! in_array($o['status'], self::CLOSED, true));
-            $session = ['id' => $this->uid(), 'token' => bin2hex(random_bytes(24)), 'tenantId' => $this->user['tenantId'], 'branchId' => $table['branchId'], 'tableId' => $id, 'status' => 'active', 'acceptingOrders' => true, 'orderIds' => array_column($orders, 'id'), 'submissions' => [], 'createdAt' => $this->now(), 'createdBy' => $this->user['id'], 'expiresAt' => now()->addHours(12)->utc()->format('Y-m-d\TH:i:s.v\Z')];
+            $orders = $this->list('orders', fn ($o) => ($o['tableId'] ?? null) === $id && OrderFlow::serviceOpen($o));
+            $session = ['id' => $this->uid(), 'token' => bin2hex(random_bytes(24)), 'tenantId' => $this->user['tenantId'], 'branchId' => $table['branchId'], 'tableId' => $id, 'status' => 'active', 'acceptingOrders' => ! array_filter($orders, fn ($o) => $o['status'] === 'paid'), 'orderIds' => array_column($orders, 'id'), 'submissions' => [], 'createdAt' => $this->now(), 'createdBy' => $this->user['id'], 'expiresAt' => now()->addHours(12)->utc()->format('Y-m-d\TH:i:s.v\Z')];
             foreach ($this->data['orders'] as &$order) {
                 if (in_array($order['id'], $session['orderIds'], true)) {
                     $order['serviceSessionId'] = $session['id'];

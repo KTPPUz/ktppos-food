@@ -1,0 +1,7 @@
+.sidebar .workspace{margin-bottom:16px}
+.sidebar nav{flex:1;gap:0;padding-bottom:12px;overscroll-behavior:contain}
+.sidebar-group{display:grid;gap:3px;align-content:start}
+.sidebar-group+.sidebar-group{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.sidebar-group-label{margin:0;padding:0 14px 6px;font-size:10px;font-weight:600;line-height:1.6;letter-spacing:.2px;color:#929b8c}
+.sidebar nav button{min-height:38px}
+.sidebar nav button[aria-current=page]{background:#fdf0eb;color:var(--primary);font-weight:600}

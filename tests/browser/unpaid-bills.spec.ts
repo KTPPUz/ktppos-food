@@ -33,8 +33,8 @@ test('cashier filters served bills and receives payment for served or unfinished
  const servedRow=panel.locator(`[data-order-id="${served.id}"]`);await expect(servedRow).toContainText('เสิร์ฟแล้ว');await expect(servedRow).toContainText('เปิด');
  async function pay(number:number){
   await panel.getByRole('button',{name:`รับชำระเงิน บิล #${number}`,exact:true}).click();
-  const dialog=page.getByRole('dialog',{name:'ชำระเงินจำลอง',exact:true});await expect(dialog).toContainText(`#${number}`);
-  await dialog.getByRole('button',{name:'QR จำลอง',exact:true}).click();await dialog.getByRole('button',{name:'ยืนยันชำระเงินจำลอง'}).click();
+  const dialog=page.getByRole('dialog',{name:'รับชำระเงิน',exact:true});await expect(dialog).toContainText(`#${number}`);
+  await dialog.getByRole('button',{name:'บัตรจำลอง',exact:true}).click();await dialog.getByRole('button',{name:'ยืนยันชำระเงินจำลอง'}).click();
   await expect(page.getByRole('dialog',{name:'ใบเสร็จรับเงิน'})).toBeVisible();await page.getByRole('button',{name:'เสร็จสิ้น'}).click();
   await expect(page.getByRole('heading',{name:'รับชำระเงิน.',exact:true})).toBeVisible();
  }
@@ -55,7 +55,7 @@ test('opening payment preserves an unsaved cart when the cashier cancels the pro
  const confirmation=page.waitForEvent('dialog');
  await page.getByRole('region',{name:'บิลที่ยังไม่ชำระ'}).getByRole('button',{name:/รับชำระเงิน บิล/}).first().click();
  await (await confirmation).dismiss();
- await expect(page.getByRole('dialog',{name:'ชำระเงินจำลอง',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('dialog',{name:'รับชำระเงิน',exact:true})).toHaveCount(0);
  await page.locator('nav').getByRole('button',{name:'ขายหน้าร้าน',exact:true}).click();
  await expect(page.locator('.cart-item')).toHaveCount(1);
 });

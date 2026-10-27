@@ -1,0 +1,8 @@
+.settings-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px;padding:5px;background:#eff2e9;border-radius:10px;width:fit-content;max-width:100%}
+.settings-tabs button{display:flex;align-items:center;justify-content:center;gap:7px;border-radius:7px;padding:10px 16px;font-size:12px;color:#7c886e}
+.settings-tabs button[aria-selected=true]{background:#fff;color:#dc7250;box-shadow:0 1px 4px #24351b0d;font-weight:600}
+.table-settings .table-edit{font-size:11px;padding:7px 12px;gap:6px;white-space:nowrap}
+.table-settings-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}
+.table-settings-note,.table-settings-empty{padding:16px 22px;font-size:11px;color:#89947c}
+.table-settings-note{border-top:1px solid var(--line);line-height:1.8;background:#fafbf7}
+@media(max-width:540px){.settings-tabs{width:100%;gap:3px}.settings-tabs button{flex:1;padding:10px 8px;font-size:11px}.table-settings-actions button{flex:1;justify-content:center}.table-settings-note{padding:14px}}

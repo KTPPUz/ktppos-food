@@ -6,17 +6,49 @@ namespace App\Services;
 
 use App\Models\AuthToken;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 
 trait ManagementActions
 {
-    private function editMenu(string $id, array $body): array
+    private function editTable(string $id, array $body): array
+    {
+        $this->allowed('settings');
+        $this->feature();
+        $table = &$this->record('tables', fn ($t) => $t['id'] === $id && $this->scope($t), 'ไม่พบโต๊ะ');
+        $this->check($body && ! array_diff(array_keys($body), ['name', 'seats']), 'แก้ไขได้เฉพาะชื่อโต๊ะและจำนวนที่นั่ง');
+        $updates = [];
+        if (array_key_exists('name', $body)) {
+            $this->check(is_string($body['name']), 'ชื่อโต๊ะไม่ถูกต้อง');
+            $name = trim($body['name']);
+            $this->check(mb_strlen($name) > 0 && mb_strlen($name) <= 50, 'กรุณาระบุชื่อโต๊ะไม่เกิน 50 ตัวอักษร');
+            $this->check(! $this->first('tables', fn ($t) => empty($t['deleted']) && $t['id'] !== $id && $t['branchId'] === $table['branchId'] && mb_strtolower(trim($t['name'])) === mb_strtolower($name)), 'ชื่อโต๊ะนี้มีในสาขาแล้ว', 409);
+            $updates['name'] = $name;
+        }
+        if (array_key_exists('seats', $body)) {
+            $this->check(is_int($body['seats']) && $body['seats'] >= 1 && $body['seats'] <= 50, 'จำนวนที่นั่งต้องเป็นจำนวนเต็ม 1–50 ที่นั่ง');
+            $updates['seats'] = $body['seats'];
+        }
+        $before = $table['name'].' · '.$table['seats'].' ที่นั่ง';
+        $table = [...$table, ...$updates];
+        $this->audit('แก้ไขข้อมูลโต๊ะ', $before.' → '.$table['name'].' · '.$table['seats'].' ที่นั่ง', $table['branchId']);
+
+        return $table;
+    }
+
+    private function editMenu(string $id, array $body, mixed $image = null): array
     {
         $this->allowed('menu');
-        $menu = $this->first('menu', fn ($m) => $m['id'] === $id);
+        $menu = $this->first('menu', fn ($m) => $m['id'] === $id && (! isset($m['tenantId']) || $m['tenantId'] === $this->user['tenantId']) && empty($this->data['menuCustom'][$this->user['tenantId']][$id]['deleted']));
         $this->check($menu, 'ไม่พบสินค้า', 404);
         $tenant = $this->user['tenantId'];
         $custom = $this->data['menuCustom'][$tenant][$id] ?? [];
+        $centralPrice = $custom['price'] ?? null;
+        $this->check(! array_diff(array_keys($body), ['name', 'en', 'price', 'category', 'modifiers', 'available', 'branchId', 'discount']), 'ข้อมูลเมนูไม่ถูกต้อง');
+        if (array_key_exists('en', $body)) {
+            $this->check(is_string($body['en']) && mb_strlen($body['en']) <= 100, 'ชื่อภาษาอังกฤษไม่ถูกต้อง');
+            $custom['en'] = trim($body['en']);
+        }
         if (array_key_exists('price', $body)) {
             $price = $this->number($body['price']);
             $this->check($price >= 0 && $price <= 100000, 'ราคาไม่ถูกต้อง');
@@ -31,7 +63,7 @@ trait ManagementActions
             $custom['discount'] = ['type' => $discount['type'], 'value' => $this->money($value)];
         }
         if (array_key_exists('category', $body)) {
-            $this->check(array_filter(config('pos.categories'), fn ($c) => $c['id'] !== 'all' && $c['id'] === $body['category']), 'หมวดหมู่ไม่ถูกต้อง');
+            $this->check(array_filter($this->categories($tenant), fn ($c) => $c['id'] !== 'all' && $c['id'] === $body['category']), 'หมวดหมู่ไม่ถูกต้อง');
             $custom['category'] = $body['category'];
         }
         if (array_key_exists('modifiers', $body)) {
@@ -48,23 +80,48 @@ trait ManagementActions
             $custom['modifiers'] = $groups;
         }
         if (array_key_exists('available', $body)) {
-            $custom['available'] = (bool) $body['available'];
+            $this->check(is_bool($body['available']), 'สถานะเมนูไม่ถูกต้อง');
+            $custom['available'] = $body['available'];
         }
         if (array_key_exists('name', $body)) {
-            $this->check(is_string($body['name']) && trim($body['name']), 'กรุณาใส่ชื่อเมนู');
+            $this->check(is_string($body['name']) && trim($body['name']) && mb_strlen(trim($body['name'])) <= 100, 'กรุณาใส่ชื่อเมนู');
             $custom['name'] = mb_substr($body['name'], 0, 100);
         }
         if (! empty($body['branchId'])) {
             $this->feature('enterprise');
             $this->check(is_string($body['branchId']), 'สาขาไม่ถูกต้อง');
             $this->branch($body['branchId']);
-            $custom['overrides'][$body['branchId']] = $custom['price'] ?? $menu['price'];
-            unset($custom['price']);
+            $custom['overrides'][$body['branchId']] = array_key_exists('price', $body) ? $price : ($custom['overrides'][$body['branchId']] ?? $centralPrice ?? $menu['price']);
+            if ($centralPrice !== null) {
+                $custom['price'] = $centralPrice;
+            } else {
+                unset($custom['price']);
+            }
+        }
+        if ($image !== null) {
+            $this->check($image instanceof UploadedFile, 'กรุณาแนบไฟล์รูปภาพที่ถูกต้อง');
+            $path = app(MenuImages::class)->store($image);
+            $this->uploadedImages[] = $path;
+            $previous = $custom['image'] ?? null;
+            $custom['image'] = $path;
+            if (is_string($previous) && str_starts_with($previous, '/media/menu-images/')) {
+                $shared = false;
+                foreach ($this->data['menuCustom'] ?? [] as $tenantId => $menus) {
+                    foreach ($menus as $menuId => $overlay) {
+                        if (($tenantId !== $tenant || $menuId !== $id) && ($overlay['image'] ?? null) === $previous) {
+                            $shared = true;
+                        }
+                    }
+                }
+                if (! $shared) {
+                    $this->replacedImages[] = $previous;
+                }
+            }
         }
         $this->data['menuCustom'][$tenant][$id] = $custom;
         $this->audit('แก้ไขเมนู', $menu['name']);
 
-        return [...$menu, ...$custom];
+        return array_values(array_filter($this->catalog($tenant), fn ($item) => $item['id'] === $id))[0];
     }
 
     private function staff(?string $id, string $method, array $body): array
@@ -99,7 +156,7 @@ trait ManagementActions
                 $this->check(! $this->first('users', fn ($u) => $u['tenantId'] === $this->user['tenantId'] && $u['id'] !== $id && mb_strtolower($u['email']) === $value), 'อีเมลนี้มีในทีมงานแล้ว', 409);
             }
             if ($field === 'role') {
-                $this->check(in_array($value, self::ROLES, true), 'บทบาทไม่ถูกต้อง');
+                $this->check($this->first('roles', fn ($role) => $role['tenantId'] === $this->user['tenantId'] && $role['key'] === $value), 'บทบาทไม่ถูกต้อง');
             }
             if ($field === 'branchId') {
                 $this->check($this->first('branches', fn ($b) => $b['id'] === $value && $b['tenantId'] === $this->user['tenantId']), 'ไม่พบสาขาในร้านนี้', 403);
@@ -150,7 +207,7 @@ trait ManagementActions
             $this->check(is_string($body['branchId'] ?? null), 'กรุณาระบุสาขา');
             $branch = $this->branch($body['branchId']);
             if (($body['open'] ?? null) === false) {
-                $this->check(! $this->first('orders', fn ($o) => $o['branchId'] === $branch['id'] && ! in_array($o['status'], self::CLOSED, true)), 'ยังมีบิลเปิดอยู่ กรุณาปิดบิลก่อน', 409);
+                $this->check(! $this->first('orders', fn ($o) => $o['branchId'] === $branch['id'] && OrderFlow::serviceOpen($o)), 'ยังมีบิลเปิดหรืออาหารที่ยังเสิร์ฟไม่ครบ กรุณาดำเนินการก่อนปิดกะ', 409);
             }
             $shift = &$this->record('shifts', fn ($s) => $s['branchId'] === $branch['id']);
             $shift['open'] = (bool) ($body['open'] ?? false);

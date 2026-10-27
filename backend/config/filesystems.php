@@ -30,6 +30,12 @@ return [
 
     'disks' => [
 
+        'menu_images' => [
+            'driver' => 'local',
+            'root' => env('MENU_IMAGE_ROOT', storage_path('app/menu-images')),
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

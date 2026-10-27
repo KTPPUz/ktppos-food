@@ -1,0 +1,9 @@
+import {CheckCheck,ChefHat,ReceiptText} from 'lucide-react';
+import {kitchenStatus} from '../shared/order-flow.mjs';
+import type {Order} from './types';
+
+const labels:Record<string,string>={pending:'รอทำ',cooking:'กำลังทำ',ready:'พร้อมเสิร์ฟ',served:'เสิร์ฟแล้ว',cancelled:'ยกเลิก'};
+export default function PaidOrderDetail({order,table,busy,canCook,canServe,update,onReceipt}:{order:Order;table:string;busy:boolean;canCook:boolean;canServe:boolean;update:(batchId:string|undefined,status:string)=>void;onReceipt:()=>void}){
+ const rounds=order.kitchenBatches?.length?order.kitchenBatches.map(b=>({id:b.id,round:b.round,status:b.status,items:order.items.filter(i=>b.itemIds.includes(i.id))})):[{id:undefined,round:1,status:kitchenStatus(order),items:order.items}];
+ return <><div className="order-detail-summary"><span>{table} · บิล #{order.number}</span><span className="badge paid">ชำระเงินแล้ว</span></div><p className="muted">รับชำระเงินแล้ว · ติดตามอาหารต่อจนเสิร์ฟครบ</p>{rounds.map(round=><section key={round.id||'order'} className="paid-service-round"><div className="paid-service-heading"><strong>รอบ {round.round}</strong><span className={'badge '+round.status}>{labels[round.status]||round.status}</span></div><div className="mini-items">{round.items.map(i=><div key={i.id}><span>{i.qty}× {i.name}<small>{i.modifiers.map(m=>m.name).join(' · ')}{i.note&&' · '+i.note}</small></span></div>)}</div>{['pending','cooking','ready'].includes(round.status)&&<button className="outline full" disabled={busy||(round.status==='ready'?!canServe:!canCook)} onClick={()=>update(round.id,round.status==='pending'?'cooking':round.status==='cooking'?'ready':'served')}>{round.status==='ready'?<CheckCheck size={17}/>:<ChefHat size={17}/>} {round.status==='pending'?'เริ่มทำอาหาร':round.status==='cooking'?'พร้อมเสิร์ฟ':'เสิร์ฟเรียบร้อย'}</button>}</section>)}<button className="outline full" onClick={onReceipt}><ReceiptText size={17}/> ดูใบเสร็จ</button></>;
+}

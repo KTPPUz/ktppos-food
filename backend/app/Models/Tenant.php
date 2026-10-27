@@ -10,6 +10,11 @@ final class Tenant extends PosRecord
 {
     protected $table = 'tenants';
 
+    public function roles(): HasMany
+    {
+        return $this->hasMany(RoleDefinition::class, 'tenant_id');
+    }
+
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class, 'tenant_id');

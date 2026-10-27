@@ -11,30 +11,25 @@ use Illuminate\Support\Str;
 
 final class PosService
 {
+    use BranchActions;
+    use CatalogActions;
+    use CategoryActions;
     use ManagementActions;
     use OrderActions;
+    use PaymentQrActions;
+    use RoleActions;
 
     public bool $dirty = false;
+
+    public array $uploadedImages = [];
+
+    public array $replacedImages = [];
 
     private array $user = [];
 
     private const CLOSED = ['paid', 'refunded', 'cancelled', 'merged', 'split'];
 
-    private const ROLES = ['Owner', 'Manager', 'Cashier', 'Waiter', 'Kitchen', 'HQ Admin'];
-
-    private const MANAGEMENT = ['Owner', 'Manager', 'HQ Admin'];
-
-    private const PERMISSIONS = [
-        'pos' => ['Owner', 'Manager', 'Cashier', 'Waiter', 'HQ Admin'],
-        'pay' => ['Owner', 'Manager', 'Cashier', 'HQ Admin'],
-        'kitchen' => ['Owner', 'Manager', 'Kitchen', 'HQ Admin'],
-        'tables' => ['Owner', 'Manager', 'Cashier', 'Waiter', 'HQ Admin'],
-        'reports' => ['Owner', 'Manager', 'Cashier', 'HQ Admin'],
-        'inventory' => ['Owner', 'Manager', 'HQ Admin'], 'menu' => ['Owner', 'Manager', 'HQ Admin'],
-        'staff' => ['Owner', 'Manager', 'HQ Admin'], 'settings' => ['Owner', 'HQ Admin'],
-        'hq' => ['Owner', 'HQ Admin'], 'refund' => ['Owner', 'Manager', 'HQ Admin'],
-        'audit' => ['Owner', 'Manager', 'HQ Admin'],
-    ];
+    private const PERMISSIONS = RoleCatalog::PERMISSIONS;
 
     public function __construct(public array $data) {}
 
@@ -62,7 +57,9 @@ final class PosService
 
     private function safe(array $user): array
     {
-        return array_diff_key($user, array_flip(['pin', 'pinHash']));
+        $role = $this->first('roles', fn ($r) => $r['tenantId'] === $user['tenantId'] && $r['key'] === $user['role']);
+
+        return [...array_diff_key($user, array_flip(['pin', 'pinHash'])), 'roleName' => $role['name'] ?? (RoleCatalog::LABELS[$user['role']] ?? $user['role'])];
     }
 
     private function list(string $key, callable $predicate): array
@@ -87,7 +84,12 @@ final class PosService
 
     private function can(string $action): bool
     {
-        return in_array($this->user['role'], self::PERMISSIONS[$action] ?? [], true);
+        if ($this->user['role'] === 'Owner') {
+            return array_key_exists($action, self::PERMISSIONS);
+        }
+        $role = $this->currentRole();
+
+        return in_array($action, $role['permissions'] ?? [], true);
     }
 
     private function allowed(string $action): void
@@ -97,7 +99,7 @@ final class PosService
 
     private function scope(array $row): bool
     {
-        return $row['tenantId'] === $this->user['tenantId'] && (in_array($this->user['role'], self::MANAGEMENT, true) || ($row['branchId'] ?? null) === $this->user['branchId']);
+        return empty($row['deleted']) && $row['tenantId'] === $this->user['tenantId'] && ($this->user['role'] === 'Owner' || ($this->currentRole()['scope'] ?? 'branch') === 'tenant' || ($row['branchId'] ?? null) === $this->user['branchId']);
     }
 
     private function plan(): string
@@ -131,7 +133,7 @@ final class PosService
     private function audit(string $action, string $detail, ?string $branchId = null, ?array $actor = null): void
     {
         $actor ??= $this->user;
-        array_unshift($this->data['audit'], ['id' => $this->uid(), 'tenantId' => $actor['tenantId'], 'branchId' => $branchId ?? $actor['branchId'], 'user' => $actor['name'], 'role' => $actor['role'], 'action' => $action, 'detail' => $detail, 'at' => $this->now()]);
+        array_unshift($this->data['audit'], ['id' => $this->uid(), 'tenantId' => $actor['tenantId'], 'branchId' => $branchId ?? $actor['branchId'], 'user' => $actor['name'], 'role' => $actor['role'], 'roleName' => $this->safe($actor)['roleName'], 'action' => $action, 'detail' => $detail, 'at' => $this->now()]);
         $this->dirty = true;
     }
 
@@ -148,11 +150,18 @@ final class PosService
 
     private function catalog(string $tenantId): array
     {
-        return array_map(function ($menu) use ($tenantId): array {
-            $custom = $this->data['menuCustom'][$tenantId][$menu['id']] ?? [];
+        $menus = $this->list('menu', fn ($menu) => (! isset($menu['tenantId']) || $menu['tenantId'] === $tenantId) && empty($this->data['menuCustom'][$tenantId][$menu['id']]['deleted']));
+        $sales = $this->bestSellers($tenantId, $menus);
 
-            return [...$menu, ...$custom, 'overrides' => array_replace($menu['overrides'] ?? [], $custom['overrides'] ?? [])];
-        }, $this->data['menu']);
+        return array_map(function ($menu) use ($tenantId, $sales): array {
+            $custom = $this->data['menuCustom'][$tenantId][$menu['id']] ?? [];
+            $result = [...$menu, ...$custom, 'popular' => in_array($menu['id'], $sales['ids'], true), 'soldQuantity' => $sales['counts'][$menu['id']] ?? 0, 'overrides' => array_replace($menu['overrides'] ?? [], $custom['overrides'] ?? [])];
+            if (str_starts_with($result['image'], '/media/menu-images/')) {
+                $result['image'] = url($result['image']);
+            }
+
+            return $result;
+        }, $menus);
     }
 
     private function price(array $menu, string $branchId): array
@@ -197,7 +206,7 @@ final class PosService
     private function tableFree(string $id, ?string $except = null): void
     {
         $this->check($this->first('tables', fn ($t) => $t['id'] === $id && $this->scope($t)), 'ไม่พบโต๊ะ');
-        $this->check(! $this->first('orders', fn ($o) => ($o['tableId'] ?? null) === $id && $o['id'] !== $except && ! in_array($o['status'], self::CLOSED, true)), 'โต๊ะนี้มีออเดอร์อยู่แล้ว', 409);
+        $this->check(! $this->first('orders', fn ($o) => ($o['tableId'] ?? null) === $id && $o['id'] !== $except && OrderFlow::serviceOpen($o)), 'โต๊ะนี้มีออเดอร์อยู่แล้ว', 409);
     }
 
     private function active(array $session): bool
@@ -217,12 +226,16 @@ final class PosService
 
     private function syncBatches(array &$order): void
     {
-        if (in_array($order['status'], self::CLOSED, true) || empty($order['kitchenBatches'])) {
+        if ((in_array($order['status'], self::CLOSED, true) && $order['status'] !== 'paid') || empty($order['kitchenBatches'])) {
             return;
         }
         foreach (['pending', 'cooking', 'ready', 'served'] as $status) {
             if (array_filter($order['kitchenBatches'], fn ($b) => $b['status'] === $status)) {
-                $order['status'] = $status;
+                if ($order['status'] === 'paid') {
+                    $order['kitchenStatus'] = $status;
+                } else {
+                    $order['status'] = $status;
+                }
 
                 return;
             }
@@ -271,9 +284,9 @@ final class PosService
                 continue;
             }
             $items = array_map(function ($item) use ($order): array {
-                return array_intersect_key($item, array_flip(['id', 'menuId', 'name', 'qty', 'unitPrice', 'originalUnitPrice', 'menuDiscount', 'modifiers', 'note'])) + ['status' => ! empty($order['kitchenBatches']) ? ($item['status'] ?? $order['status']) : $order['status']];
+                return array_intersect_key($item, array_flip(['id', 'menuId', 'name', 'qty', 'unitPrice', 'originalUnitPrice', 'menuDiscount', 'modifiers', 'note'])) + ['status' => ! empty($order['kitchenBatches']) ? ($item['status'] ?? OrderFlow::kitchenStatus($order)) : OrderFlow::kitchenStatus($order)];
             }, $order['items']);
-            $result[] = ['id' => $id, 'number' => $order['number'], 'status' => $order['status'], 'items' => $items, 'totals' => $order['totals'] ?? $this->totals($order), 'createdAt' => $order['createdAt'], 'roundingAdjustment' => $order['roundingAdjustment'] ?? 0, 'kitchenBatches' => $order['kitchenBatches'] ?? []];
+            $result[] = ['id' => $id, 'number' => $order['number'], 'status' => $order['status'], 'kitchenStatus' => OrderFlow::kitchenStatus($order), 'items' => $items, 'totals' => $order['totals'] ?? $this->totals($order), 'createdAt' => $order['createdAt'], 'roundingAdjustment' => $order['roundingAdjustment'] ?? 0, 'kitchenBatches' => $order['kitchenBatches'] ?? []];
         }
 
         return $result;
@@ -295,7 +308,7 @@ final class PosService
                 continue;
             }
             $session['acceptingOrders'] = false;
-            if (! array_filter($session['orderIds'], fn ($id) => ! in_array($this->first('orders', fn ($o) => $o['id'] === $id)['status'] ?? '', self::CLOSED, true))) {
+            if (! array_filter($session['orderIds'], fn ($id) => OrderFlow::serviceOpen($this->first('orders', fn ($o) => $o['id'] === $id) ?? ['status' => 'cancelled']))) {
                 $this->closeSession($session, 'รอบบริการนี้สิ้นสุดแล้ว กรุณาขอ QR ใหม่จากพนักงาน');
             }
         }
@@ -328,7 +341,7 @@ final class PosService
         $reason = ! $active ? ($session['closeReason'] ?? 'QR หมดอายุ กรุณาขอ QR ใหม่จากพนักงาน') : (! $session['acceptingOrders'] ? 'โต๊ะนี้กำลังแยกหรือชำระบิล กรุณาติดต่อพนักงาน' : (! ($shift['open'] ?? false) ? 'ร้านพักรับออเดอร์ชั่วคราว' : ''));
         $menu = $active ? array_map(fn ($m) => [...array_intersect_key($m, array_flip(['id', 'name', 'en', 'category', 'image', 'popular', 'available', 'discount', 'modifiers'])), ...$this->price($m, $session['branchId'])], $this->catalog($session['tenantId'])) : [];
 
-        return ['session' => [...$this->summary($session), 'acceptingOrders' => $active && $session['acceptingOrders'] && ($shift['open'] ?? false), 'reason' => $reason], 'restaurant' => ['name' => $tenant['name'], 'branch' => $branch['name'], 'table' => $table['name'], 'seats' => $table['seats']], 'categories' => $active ? config('pos.categories') : [], 'acceptedRequests' => array_column($session['submissions'] ?? [], 'key'), 'settings' => ['taxRate' => $settings['taxRate'], 'serviceRate' => $settings['serviceRate']], 'menu' => $menu, 'orders' => $active ? $this->serializeOrders($session) : ($session['closedOrders'] ?? [])];
+        return ['session' => [...$this->summary($session), 'acceptingOrders' => $active && $session['acceptingOrders'] && ($shift['open'] ?? false), 'reason' => $reason], 'restaurant' => ['name' => $tenant['name'], 'branch' => $branch['name'], 'table' => $table['name'], 'seats' => $table['seats']], 'categories' => $active ? $this->categories($session['tenantId']) : [], 'acceptedRequests' => array_column($session['submissions'] ?? [], 'key'), 'settings' => ['taxRate' => $settings['taxRate'], 'serviceRate' => $settings['serviceRate']], 'menu' => $menu, 'orders' => $active ? $this->serializeOrders($session) : ($session['closedOrders'] ?? [])];
     }
 
     private function guest(string $token, bool $submit, array $body): array
@@ -390,6 +403,16 @@ final class PosService
         $method = $request->method();
         $path = '/'.trim(preg_replace('#^api/?#', '', $request->path()), '/');
         $body = $request->json()->all();
+        if ($request->has('payload')) {
+            $this->check(is_string($request->input('payload')), 'ข้อมูลไม่ถูกต้อง');
+            try {
+                $body = json_decode($request->input('payload'), true, 512, JSON_THROW_ON_ERROR);
+            } catch (\JsonException $error) {
+                throw new ApiError('ข้อมูลไม่ถูกต้อง');
+            }
+            $this->check(is_array($body) && ! array_is_list($body), 'ข้อมูลไม่ถูกต้อง');
+        }
+
         if ($path === '/demo' && $method === 'GET') {
             return ['body' => ['tenants' => $this->data['tenants'], 'accounts' => array_map($this->safe(...), $this->data['users'])]];
         }
@@ -419,20 +442,46 @@ final class PosService
 
             return ['body' => ['ok' => true]];
         }
+        if ($method === 'GET' && preg_match('#^/audit/([^/]+)$#D', $path, $match)) {
+            $this->allowed('audit');
+
+            return ['body' => $this->record('audit', fn ($entry) => $entry['id'] === $match[1] && $this->scope($entry))];
+        }
         if ($path === '/state' && $method === 'GET') {
             return ['body' => $this->state($request)];
+        }
+        if ($path === '/categories' && $method === 'GET') {
+            return ['body' => $this->categories($user['tenantId'])];
+        }
+        if ($path === '/categories' || preg_match('#^/categories/[^/]+$#D', $path)) {
+            return $this->manageCategory($path === '/categories' ? null : substr($path, 12), $method, $body);
         }
         if ($path === '/menu-items' && $method === 'GET') {
             return ['body' => $this->catalog($user['tenantId'])];
         }
         if ($path === '/branches' && $method === 'GET') {
-            return ['body' => $this->list('branches', fn ($b) => $this->scope([...$b, 'branchId' => $b['id']]))];
+            return ['body' => array_map($this->publicBranch(...), $this->list('branches', fn ($b) => $this->scope([...$b, 'branchId' => $b['id']])))];
+        }
+        if (preg_match('#^/branches/([^/]+)/payment-qr$#D', $path, $match)) {
+            return ['body' => $this->paymentQr($match[1], $method, $body, $request->file('image'))];
+        }
+        if ($path === '/branches' || preg_match('#^/branches/[^/]+$#D', $path)) {
+            return $this->manageBranch($path === '/branches' ? null : substr($path, 10), $method, $body);
         }
         if ($path === '/orders' && $method === 'POST') {
             return ['status' => 201, 'body' => $this->createOrder($body)];
         }
         if (preg_match('#^/orders/([^/]+)(?:/(.*))?$#D', $path, $m)) {
             return ['body' => $this->orderAction($m[1], $m[2] ?? '', $method, $body)];
+        }
+        if ($path === '/tables' && $method === 'POST') {
+            return $this->createTable($body);
+        }
+        if (preg_match('#^/tables/([^/]+)$#D', $path, $m) && $method === 'DELETE') {
+            return ['body' => $this->deleteTable($m[1])];
+        }
+        if (preg_match('#^/tables/([^/]+)$#D', $path, $m) && $method === 'PATCH') {
+            return ['body' => $this->editTable($m[1], $body)];
         }
         if (preg_match('#^/tables/([^/]+)/(session|reservation)$#D', $path, $m)) {
             return ['body' => $this->tableAction($m[1], $m[2], $method, $body)];
@@ -442,18 +491,30 @@ final class PosService
             $this->feature();
             $session = &$this->record('tableSessions', fn ($s) => $s['id'] === $m[1] && $this->scope($s));
             foreach ($session['orderIds'] as $id) {
-                $this->check(in_array($this->first('orders', fn ($o) => $o['id'] === $id)['status'] ?? '', self::CLOSED, true), 'ยังมีบิลค้าง กรุณาชำระหรือยกเลิกบิลก่อนปิดรอบ', 409);
+                $this->check(! OrderFlow::serviceOpen($this->first('orders', fn ($o) => $o['id'] === $id) ?? ['status' => 'cancelled']), 'ยังมีบิลค้างหรืออาหารที่ยังเสิร์ฟไม่ครบ กรุณาดำเนินการก่อนปิดรอบ', 409);
             }
             $this->closeSession($session, 'พนักงานปิดรอบบริการแล้ว กรุณาขอ QR ใหม่');
             $this->audit('ปิด QR สั่งอาหาร', $session['tableId'], $session['branchId']);
 
             return ['body' => ['ok' => true]];
         }
-        if (preg_match('#^/menu-items/([^/]+)$#D', $path, $m) && $method === 'PATCH') {
-            return ['body' => $this->editMenu($m[1], $body)];
+        if ($path === '/menu-items' && $method === 'POST') {
+            return $this->createMenu($body, $request->file('image'));
+        }
+        if (preg_match('#^/menu-items/([^/]+)$#D', $path, $m)) {
+            if ($method === 'PATCH') {
+                return ['body' => $this->editMenu($m[1], $body, $request->file('image'))];
+            }
+            if ($method === 'DELETE') {
+                return ['body' => $this->deleteMenu($m[1])];
+            }
         }
         if ($path === '/users' || preg_match('#^/users/[^/]+$#D', $path)) {
             return $this->staff($path === '/users' ? null : substr($path, 7), $method, $body);
+        }
+
+        if ($path === '/roles' || preg_match('#^/roles/[^/]+$#D', $path)) {
+            return $this->roles($path === '/roles' ? null : substr($path, 7), $method, $body);
         }
 
         return ['body' => $this->management($path, $method, $body, $request)];
@@ -464,6 +525,6 @@ final class PosService
         $plan = $this->plan();
         $urls = config('pos.customer_base_url') ? [rtrim(config('pos.customer_base_url'), '/')] : [$request->getSchemeAndHttpHost()];
 
-        return ['user' => $this->safe($this->user), 'customerBaseUrls' => $urls, 'tableSessions' => $plan === 'Small' || ! $this->can('tables') ? [] : array_map($this->summary(...), $this->list('tableSessions', fn ($s) => $this->scope($s) && $this->active($s))), 'tenant' => $this->first('tenants', fn ($t) => $t['id'] === $this->user['tenantId']), 'branches' => $this->list('branches', fn ($b) => $this->scope([...$b, 'branchId' => $b['id']])), 'categories' => config('pos.categories'), 'menu' => $this->catalog($this->user['tenantId']), 'orders' => $this->list('orders', fn ($o) => $this->scope($o) && ($this->can('reports') || ! in_array($o['status'], ['paid', 'refunded'], true))), 'tables' => $plan === 'Small' ? [] : $this->list('tables', $this->scope(...)), 'ingredients' => $this->can('inventory') && $plan !== 'Small' ? $this->list('ingredients', $this->scope(...)) : [], 'users' => $this->can('staff') ? array_map($this->safe(...), $this->list('users', fn ($u) => $u['tenantId'] === $this->user['tenantId'])) : [], 'audit' => $this->can('audit') ? $this->list('audit', $this->scope(...)) : [], 'transfers' => $plan === 'Enterprise' && $this->can('hq') ? $this->list('transfers', fn ($t) => $t['tenantId'] === $this->user['tenantId']) : [], 'shifts' => $this->list('shifts', $this->scope(...)), 'recipes' => $this->can('inventory') ? $this->data['recipes'] : [], 'settings' => $this->first('settings', fn ($s) => $s['tenantId'] === $this->user['tenantId']), 'permissions' => array_values(array_filter(array_keys(self::PERMISSIONS), $this->can(...)))];
+        return [...$this->roleState(), 'user' => $this->safe($this->user), 'customerBaseUrls' => $urls, 'tableSessions' => $plan === 'Small' || ! $this->can('tables') ? [] : array_map($this->summary(...), $this->list('tableSessions', fn ($s) => $this->scope($s) && $this->active($s))), 'tenant' => $this->first('tenants', fn ($t) => $t['id'] === $this->user['tenantId']), 'branches' => array_map($this->publicBranch(...), $this->list('branches', fn ($b) => $this->scope([...$b, 'branchId' => $b['id']]))), 'archivedTables' => $this->list('tables', fn ($table) => ! empty($table['deleted']) && $this->scope([...$table, 'deleted' => false])), 'categories' => $this->categories($this->user['tenantId']), 'menu' => $this->catalog($this->user['tenantId']), 'orders' => $this->list('orders', fn ($o) => $this->scope($o) && ($this->can('reports') || ! in_array($o['status'], ['paid', 'refunded'], true) || ($o['status'] === 'paid' && OrderFlow::needsService($o) && ($this->can('kitchen') || $this->can('tables'))))), 'tables' => $plan === 'Small' ? [] : $this->list('tables', $this->scope(...)), 'ingredients' => $this->can('inventory') && $plan !== 'Small' ? $this->list('ingredients', $this->scope(...)) : [], 'users' => $this->can('staff') ? array_map($this->safe(...), $this->list('users', $this->scope(...))) : [], 'audit' => $this->can('audit') ? array_map(fn ($entry) => array_diff_key($entry, ['changes' => true]), $this->list('audit', $this->scope(...))) : [], 'transfers' => $plan === 'Enterprise' && $this->can('hq') ? $this->list('transfers', fn ($t) => $t['tenantId'] === $this->user['tenantId']) : [], 'shifts' => $this->list('shifts', $this->scope(...)), 'recipes' => $this->can('inventory') ? $this->data['recipes'] : [], 'settings' => $this->first('settings', fn ($s) => $s['tenantId'] === $this->user['tenantId']), 'permissions' => array_values(array_filter(array_keys(self::PERMISSIONS), $this->can(...)))];
     }
 }

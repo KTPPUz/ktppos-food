@@ -4,6 +4,7 @@ import type {Role,State,User} from './types';
 import {api} from './api';
 import {roleLabel,staffRoles} from './roles';
 import './staff.css';
+import DataTable from './DataTable';
 
 type Form={name:string;email:string;role:Role;branchId:string;pin:string};
 export default function StaffPanel({state,branch,refresh,notify}:{state:State;branch:string;refresh:()=>Promise<unknown>;notify:(message:string)=>void}){
@@ -13,6 +14,8 @@ export default function StaffPanel({state,branch,refresh,notify}:{state:State;br
   const [error,setError]=useState(''),[busy,setBusy]=useState(false);
   const lock=useRef(false),opener=useRef<HTMLElement|null>(null);
   const canManage=state.user.role==='Owner';
+  const roles=state.roles?.length?state.roles.map(r=>({key:r.key,name:r.name})):staffRoles.map(key=>({key,name:roleLabel(key)}));
+  const defaultRole=roles.find(r=>r.key==='Waiter')?.key||roles.find(r=>r.key!=='Owner')?.key||'Owner';
   function close(){if(lock.current)return;setMode(null);setError('');opener.current?.focus();}
   useEffect(()=>{
     if(!mode)return;
@@ -22,7 +25,7 @@ export default function StaffPanel({state,branch,refresh,notify}:{state:State;br
   function open(next:'add'|'edit'|'delete',employee?:User){
     opener.current=document.activeElement as HTMLElement;
     setSelected(employee||null);setError('');
-    setForm(employee?{name:employee.name,email:employee.email,role:employee.role,branchId:employee.branchId,pin:''}:{name:'',email:'',role:'Waiter',branchId:branch,pin:''});
+    setForm(employee?{name:employee.name,email:employee.email,role:employee.role,branchId:employee.branchId,pin:''}:{name:'',email:'',role:defaultRole,branchId:branch,pin:''});
     setMode(next);
   }
   async function submit(){
@@ -41,11 +44,14 @@ export default function StaffPanel({state,branch,refresh,notify}:{state:State;br
   return <>
     <section className="panel staff-panel">
       <div className="panel-heading"><div><h3>ทีมงาน {state.users.length} คน</h3><p>รายชื่อทีมงานและสิทธิ์การใช้งานในร้าน</p></div>{canManage&&<button className="primary" onClick={()=>open('add')}><Plus size={17}/> เพิ่มทีมงาน</button>}</div>
-      <div className="table-scroll"><table><thead><tr><th>พนักงาน</th><th>อีเมล</th><th>บทบาท</th><th>สาขา</th>{canManage&&<th>จัดการ</th>}</tr></thead><tbody>{state.users.map(employee=><tr key={employee.id}>
-        <td><div className="staff-name"><div className="avatar">{employee.name.slice(0,1)}</div><strong>{employee.name} {employee.id===state.user.id&&<small>(คุณ)</small>}</strong></div></td>
-        <td>{employee.email}</td><td><span className="badge role">{roleLabel(employee.role)}</span></td><td>{state.branches.find(b=>b.id===employee.branchId)?.name||employee.branchId}</td>
-        {canManage&&<td>{employee.id===state.user.id?<small className="muted">บัญชีที่กำลังใช้งาน</small>:<div className="staff-actions"><button className="outline" aria-label={`แก้ไข ${employee.name}`} onClick={()=>open('edit',employee)}><Pencil size={15}/> แก้ไข</button><button className="danger-button" aria-label={`ลบ ${employee.name}`} onClick={()=>open('delete',employee)}><Trash2 size={15}/> ลบ</button></div>}</td>}
-      </tr>)}</tbody></table></div>
+      <DataTable label="ตารางทีมงาน" rows={state.users} rowKey={employee=>employee.id} resetKey={state.tenant.id} searchLabel="ค้นหาทีมงาน" searchPlaceholder="ค้นหาชื่อ อีเมล บทบาท หรือสาขา…" searchText={employee=>`${employee.name} ${employee.email} ${employee.roleName||roleLabel(employee.role)} ${state.branches.find(b=>b.id===employee.branchId)?.name||''}`} columns={[
+        {key:'name',label:'พนักงาน',value:employee=>employee.name,render:employee=><div className="staff-name"><div className="avatar">{employee.name.slice(0,1)}</div><strong>{employee.name} {employee.id===state.user.id&&<small>(คุณ)</small>}</strong></div>},
+        {key:'email',label:'อีเมล',value:employee=>employee.email,render:employee=>employee.email},
+        {key:'role',label:'บทบาท',value:employee=>employee.roleName||roleLabel(employee.role),render:employee=><span className="badge role">{employee.roleName||roleLabel(employee.role)}</span>},
+        {key:'branch',label:'สาขา',value:employee=>state.branches.find(b=>b.id===employee.branchId)?.name||employee.branchId,render:employee=>state.branches.find(b=>b.id===employee.branchId)?.name||employee.branchId},
+        ...(canManage?[{key:'actions',label:'จัดการ',className:'data-table-actions',render:(employee:User)=>employee.id===state.user.id?<small className="muted">บัญชีที่กำลังใช้งาน</small>:<div className="staff-actions"><button className="outline" aria-label={`แก้ไข ${employee.name}`} onClick={()=>open('edit',employee)}><Pencil size={15}/> แก้ไข</button><button className="danger-button" aria-label={`ลบ ${employee.name}`} onClick={()=>open('delete',employee)}><Trash2 size={15}/> ลบ</button></div>}]:[]),
+      ]}/>
+
     </section>
     <div className="info-banner"><LockKeyhole size={21}/><div><strong>{canManage?'เจ้าของร้านจัดการทีมงานได้ทุกสาขาในร้าน':'เจ้าของร้านเป็นผู้จัดการข้อมูลทีมงาน'}</strong><p>เพิ่มชื่อ อีเมล บทบาท สาขา และ PIN เข้าสู่ระบบ · เมื่อเปลี่ยน PIN บทบาท หรือสาขา ทีมงานต้องเข้าสู่ระบบใหม่</p></div></div>
     {mode&&<div className="overlay" onMouseDown={e=>{if(e.target===e.currentTarget)close();}}><section className="modal" role="dialog" aria-modal="true" aria-label={title}><header><div><h2>{title}</h2><p>{mode==='delete'?'ตรวจสอบรายชื่อก่อนยืนยัน':'กำหนดข้อมูลและสิทธิ์เข้าถึงระบบของทีมงาน'}</p></div><button className="icon-btn" aria-label="ปิด" disabled={busy} onClick={close}><X size={21}/></button></header><div className="modal-body">
@@ -54,7 +60,7 @@ export default function StaffPanel({state,branch,refresh,notify}:{state:State;br
         <fieldset className="staff-fields" disabled={busy}>
           <label>ชื่อทีมงาน<input autoFocus required maxLength={100} value={form.name} onChange={e=>setForm({...form,name:e.target.value})} autoComplete="name"/></label>
           <label>อีเมล<input type="email" required maxLength={254} value={form.email} onChange={e=>setForm({...form,email:e.target.value})} autoComplete="off"/></label>
-          <div className="staff-form-grid"><label>บทบาท<select value={form.role} onChange={e=>setForm({...form,role:e.target.value as Role})}>{staffRoles.map(role=><option key={role} value={role}>{roleLabel(role)}</option>)}</select></label>
+          <div className="staff-form-grid"><label>บทบาท<select value={form.role} onChange={e=>setForm({...form,role:e.target.value as Role})}>{roles.map(role=><option key={role.key} value={role.key}>{role.name}</option>)}</select></label>
           <label>สาขา<select value={form.branchId} onChange={e=>setForm({...form,branchId:e.target.value})}>{state.branches.map(b=><option key={b.id} value={b.id}>{b.name}</option>)}</select></label></div>
           <label>{mode==='add'?'PIN เข้าสู่ระบบ':'PIN ใหม่ (เว้นว่างเพื่อใช้ PIN เดิม)'}<input type="password" inputMode="numeric" pattern="[0-9]{4,8}" minLength={4} maxLength={8} required={mode==='add'} value={form.pin} onChange={e=>setForm({...form,pin:e.target.value})} autoComplete="new-password" placeholder="ตัวเลข 4–8 หลัก"/></label>
         </fieldset>

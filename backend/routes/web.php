@@ -1,7 +1,10 @@
 <?php
 
+use App\Services\MenuImages;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/media/menu-images/{name}', fn (string $name, MenuImages $images) => $images->response($name));
 
 Route::get('/healthz', function () {
     try {

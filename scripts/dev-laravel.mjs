@@ -2,7 +2,7 @@ import {spawn} from 'node:child_process';
 import {createServer} from 'vite';
 import path from 'node:path';
 const apiPort=process.env.PHP_API_PORT||'8050';
-const php=spawn(process.env.PHP_BINARY||'php',['artisan','serve','--host=127.0.0.1',`--port=${apiPort}`,'--no-reload'],{cwd:path.resolve('backend'),stdio:'inherit',env:process.env});
+const php=spawn(process.env.PHP_BINARY||'php',['-d','upload_max_filesize=6M','-d','post_max_size=8M','-S',`127.0.0.1:${apiPort}`,'-t','public',path.resolve('backend/dev-server.php')],{cwd:path.resolve('backend'),stdio:'inherit',env:process.env});
 let vite,stopping=false;
 async function stop(code=0){if(stopping)return;stopping=true;php.kill('SIGTERM');await vite?.close();process.exit(code);}
 php.on('error',error=>{console.error(error.message);stop(1);});
