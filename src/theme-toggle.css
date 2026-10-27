@@ -1,0 +1,5 @@
+.theme-toggle{border:1px solid var(--line);background:#fff;width:36px;height:36px}
+.theme-toggle:hover{color:var(--primary)}
+.theme-toggle.floating{position:fixed;right:16px;bottom:16px;z-index:60;width:42px;height:42px;border-radius:50%;box-shadow:0 6px 18px rgba(30,40,30,.14)}
+@media print{.theme-toggle{display:none}}
+.guest-header-actions{display:flex;align-items:center;gap:8px}

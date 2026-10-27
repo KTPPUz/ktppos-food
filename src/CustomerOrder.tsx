@@ -5,6 +5,7 @@ import {newId} from './ids';
 import {apiFetch,mockupMode} from './runtime';
 import {menuDiscountLabel} from '../shared/pricing.mjs';
 import './customer.css';
+import ThemeToggle from './ThemeToggle';
 type GuestMenu=Omit<MenuItem,'overrides'>&{originalPrice:number;discountAmount:number};
 type GuestOrder={kitchenStatus?:string;id:string;number:number;status:string;items:Item[];totals:Totals;kitchenBatches:KitchenBatch[];createdAt:string};
 type GuestState={session:{id:string;active:boolean;acceptingOrders:boolean;reason:string;expiresAt:string};restaurant:{name:string;branch:string;table:string;seats:number};menu:GuestMenu[];categories:{id:string;name:string}[];settings:{taxRate:number;serviceRate:number};orders:GuestOrder[];acceptedRequests:string[]};
@@ -48,7 +49,7 @@ export default function CustomerOrder({token}:{token:string}){
  const activeOrders=data.orders.filter(o=>!['cancelled','merged','refunded'].includes(o.status));
  const rounds=activeOrders.flatMap(o=>o.kitchenBatches?.length?o.kitchenBatches.map(b=>({key:b.id,number:o.number,round:b.round,status:b.status,paid:o.status==='paid',at:b.createdAt,items:o.items.filter(i=>b.itemIds.includes(i.id))})): [{key:o.id,number:o.number,round:1,status:o.kitchenStatus||o.status,paid:o.status==='paid',at:o.createdAt,items:o.items}]).filter(b=>b.items.length);
  const productPrice=product?product.price+product.modifiers.reduce((s,g)=>s+(g.options.find(o=>o.name===mods[g.id])?.price||0),0):0;
- return <div className="guest-app"><header className="guest-header"><a className="guest-brand" href={window.location.href}><div className="brand-mark"><UtensilsCrossed size={21}/></div><span>{data.restaurant.name}<small>GOOD FOOD. GOOD MOMENTS.</small></span></a><div className="guest-table"><Armchair size={17}/><span>โต๊ะ <b>{data.restaurant.table}</b></span></div></header><main className="guest-main"><div className="guest-demo"><span className="live-dot"/> DEMO · สั่งอาหารตัวอย่าง ไม่มีการเรียกเก็บเงินจริง</div>
+ return <div className="guest-app"><header className="guest-header"><a className="guest-brand" href={window.location.href}><div className="brand-mark"><UtensilsCrossed size={21}/></div><span>{data.restaurant.name}<small>GOOD FOOD. GOOD MOMENTS.</small></span></a><div className="guest-header-actions"><div className="guest-table"><Armchair size={17}/><span>โต๊ะ <b>{data.restaurant.table}</b></span></div><ThemeToggle/></div></header><main className="guest-main"><div className="guest-demo"><span className="live-dot"/> DEMO · สั่งอาหารตัวอย่าง ไม่มีการเรียกเก็บเงินจริง</div>
  <section className="guest-welcome"><div className="eyebrow">A LITTLE MOMENT OF DELICIOUS</div><h1>มื้อนี้ อยากทานอะไรดี<span>?</span></h1><p>เลือกเมนูที่ชอบ แล้วให้ครัวดูแลมื้ออร่อยของคุณ</p><div><Leaf size={14}/> ปรุงสดทุกจาน <i/> สาขา{data.restaurant.branch}<span>{data.restaurant.seats} ที่นั่ง</span></div></section>
  {loadError&&<div className="error" role="alert"><AlertCircle size={17}/>{loadError}<button className="text-button" onClick={refresh}>ลองใหม่</button></div>}
  {!data.session.acceptingOrders&&<div className="guest-session-message" role="status"><AlertCircle size={20}/><div><strong>{data.session.active?'หยุดรับรายการเพิ่มชั่วคราว':'รอบบริการสิ้นสุดแล้ว'}</strong><p>{data.session.reason}</p></div></div>}
