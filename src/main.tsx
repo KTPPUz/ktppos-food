@@ -6,6 +6,7 @@ import {mockupMode} from './runtime';
 import {customerOrderToken} from '../shared/deployment.mjs';
 import CustomerOrder from './CustomerOrder';
 import './styles.css';
+import './modern.css';
 
 const currentGuestToken=()=>customerOrderToken(window.location.pathname,window.location.hash);
 function Root(){

@@ -72,8 +72,8 @@ function convert(text,role){
 
 function roleOf(prop){
   if(/shadow/.test(prop))return 'shadow';
-  if(/^(color|fill|stroke|caret-color|text-decoration|--muted)/.test(prop))return 'text';
-  if(/^(border|outline|column-rule|--line)/.test(prop))return 'border';
+  if(/^(color|fill|stroke|caret-color|text-decoration|--muted|--text)/.test(prop))return 'text';
+  if(/^(border|outline|column-rule|--line|--border)/.test(prop))return 'border';
   return 'surface';
 }
 
