@@ -10,3 +10,7 @@ export function serviceOpen(order) {
   return !['paid', 'refunded', 'cancelled', 'merged', 'split'].includes(order.status)
     || (order.status === 'paid' && needsService(order));
 }
+
+export function isCooking(order) {
+  return kitchenStatus(order) === 'cooking' || (order.kitchenBatches || []).some(batch => batch.status === 'cooking');
+}

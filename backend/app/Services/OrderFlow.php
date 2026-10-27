@@ -22,4 +22,10 @@ final class OrderFlow
         return ! in_array($order['status'], ['paid', 'refunded', 'cancelled', 'merged', 'split'], true)
             || ($order['status'] === 'paid' && self::needsService($order));
     }
+
+    public static function isCooking(array $order): bool
+    {
+        return self::kitchenStatus($order) === 'cooking'
+            || (bool) array_filter($order['kitchenBatches'] ?? [], fn ($batch) => $batch['status'] === 'cooking');
+    }
 }

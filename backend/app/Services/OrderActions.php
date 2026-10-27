@@ -218,6 +218,7 @@ trait OrderActions
     private function pay(array &$order, array $body): array
     {
         $this->allowed('pay');
+        $this->check(! OrderFlow::isCooking($order), 'ออเดอร์กำลังทำอาหาร กรุณารอครัวทำเสร็จก่อนรับชำระเงิน', 409);
         $this->check(in_array($body['method'] ?? null, ['cash', 'qr', 'card'], true), 'วิธีชำระเงินไม่ถูกต้อง');
         if ($body['method'] === 'qr') {
             $config = $this->branch($order['branchId'])['paymentQr'] ?? [];

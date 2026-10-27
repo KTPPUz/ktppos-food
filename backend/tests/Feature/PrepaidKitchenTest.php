@@ -45,7 +45,11 @@ final class PrepaidKitchenTest extends TestCase
                     break;
                 }
             }
-            $expected = $stage === 'draft' ? 'pending' : $stage;
+            if ($stage === 'cooking') {
+                $this->postJson($path.'/payments', ['method' => 'cash', 'received' => 1000], $this->owner)->assertStatus(409);
+                $this->patchJson($path.'/status', ['status' => 'ready'], $this->owner)->assertOk();
+            }
+            $expected = $stage === 'draft' ? 'pending' : ($stage === 'cooking' ? 'ready' : $stage);
             $paid = $this->postJson($path.'/payments', ['method' => 'cash', 'received' => 1000], $this->owner)->assertOk()->assertJsonPath('status', 'paid')->assertJsonPath('kitchenStatus', $expected)->json();
             $this->postJson($path.'/payments', ['method' => 'cash', 'received' => 1000], $this->owner)->assertStatus(409);
             $this->postJson($path.'/items', ['items' => [['menuId' => 'm30', 'qty' => 1]]], $this->owner)->assertStatus(409);
@@ -69,10 +73,10 @@ final class PrepaidKitchenTest extends TestCase
         $session = $this->postJson('/api/tables/r1-t15/session', [], $this->owner)->assertOk()->json();
         $guestPath = '/api/guest/'.$session['token'];
         $first = $this->postJson($guestPath.'/orders', ['requestId' => 'prepaid-kitchen-round-01', 'items' => [['menuId' => 'm30', 'qty' => 1]]])->assertCreated()->json();
-        $this->patchJson('/api/orders/'.$first['orderId'].'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'cooking'], $this->owner)->assertOk();
         $second = $this->postJson($guestPath.'/orders', ['requestId' => 'prepaid-kitchen-round-02', 'items' => [['menuId' => 'm30', 'qty' => 1]]])->assertCreated()->json();
         $path = '/api/orders/'.$first['orderId'];
         $this->postJson($path.'/payments', ['method' => 'cash', 'received' => 1000], $this->owner)->assertOk()->assertJsonPath('kitchenStatus', 'pending');
+        $this->patchJson('/api/orders/'.$first['orderId'].'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'cooking'], $this->owner)->assertOk();
         $this->getJson($guestPath)->assertOk()->assertJsonPath('session.active', true)->assertJsonPath('session.acceptingOrders', false)->assertJsonPath('orders.0.status', 'paid');
         $this->postJson($guestPath.'/orders', ['requestId' => 'prepaid-kitchen-round-03', 'items' => [['menuId' => 'm30', 'qty' => 1]]])->assertStatus(409);
         $this->postJson('/api/orders', ['branchId' => 'r1', 'type' => 'dinein', 'tableId' => 'r1-t15', 'items' => [['menuId' => 'm30', 'qty' => 1]]], $this->owner)->assertStatus(409);
@@ -152,5 +156,25 @@ final class PrepaidKitchenTest extends TestCase
         }
         $this->assertSame($stock, $this->getJson('/api/state', $brand)->assertOk()->json('ingredients'));
         $this->patchJson($path.'/status', ['status' => 'cooking'], $this->owner)->assertNotFound();
+    }
+
+    public function test_payment_is_blocked_if_any_kitchen_round_is_cooking_even_when_order_is_pending(): void
+    {
+        $session = $this->postJson('/api/tables/r1-t15/session', [], $this->owner)->assertOk()->json();
+        $guest = '/api/guest/'.$session['token'].'/orders';
+        $first = $this->postJson($guest, ['requestId' => 'cooking-payment-request-01', 'items' => [['menuId' => 'm30', 'qty' => 1]]])->assertCreated()->json();
+        $path = '/api/orders/'.$first['orderId'];
+        $this->patchJson($path.'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'cooking'], $this->owner)->assertOk();
+        $this->postJson($guest, ['requestId' => 'cooking-payment-request-02', 'items' => [['menuId' => 'm30', 'qty' => 1]]])->assertCreated()->assertJsonPath('orders.0.status', 'pending');
+        foreach (['cash', 'qr', 'card'] as $method) {
+            $this->postJson($path.'/payments', ['method' => $method, 'received' => 1000], $this->owner)->assertStatus(409)->assertJsonPath('error', 'ออเดอร์กำลังทำอาหาร กรุณารอครัวทำเสร็จก่อนรับชำระเงิน');
+        }
+        $payload = PosOrder::findOrFail($first['orderId'])->payload;
+        $this->assertSame('pending', $payload['status']);
+        $this->assertArrayNotHasKey('payment', $payload);
+        $this->assertArrayNotHasKey('paidAt', $payload);
+        $this->assertArrayNotHasKey('receipt', $payload);
+        $this->patchJson($path.'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'ready'], $this->owner)->assertOk();
+        $this->postJson($path.'/payments', ['method' => 'cash', 'received' => 1000], $this->owner)->assertOk()->assertJsonPath('status', 'paid');
     }
 }

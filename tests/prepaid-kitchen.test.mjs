@@ -47,3 +47,15 @@ test('browser demo keeps paid QR orders visible through serving without charging
  }
  state=(await call(guest)).body;assert.equal(state.session.active,false);assert.equal(state.orders[0].kitchenStatus,'served');
 });
+
+test('unpaid bill payment buttons are hidden for cooking and mixed cooking rounds',async()=>{
+ const result=await build({stdin:{contents:`import {renderToStaticMarkup} from 'react-dom/server';import UnpaidBills from './src/UnpaidBills';
+ const base={id:'test',createdAt:new Date().toISOString(),tableId:null,type:'takeaway',items:[]};
+ const orders=[{...base,id:'cooking',number:1,status:'cooking'},{...base,id:'mixed',number:2,status:'pending',kitchenBatches:[{status:'cooking'}]},{...base,id:'ready',number:3,status:'ready'},{...base,id:'pending',number:4,status:'pending'}];
+ export const html=renderToStaticMarkup(<UnpaidBills orders={orders} tableName={()=>''} amount={()=>100} statusName={{cooking:'กำลังทำ',pending:'รอทำ',ready:'พร้อมเสิร์ฟ'}} canPay={true} busy={false} onOpen={()=>{}} onPay={()=>{}}/>);`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,platform:'node',format:'cjs',jsx:'automatic',packages:'external',loader:{'.css':'empty'},write:false});
+ const compiled=new Module(process.cwd()+'/tests/cooking-payment-render.cjs');compiled.paths=Module._nodeModulePaths(process.cwd());compiled._compile(result.outputFiles[0].text,compiled.id);
+ const {html}=compiled.exports;
+ assert.doesNotMatch(html,/aria-label="รับชำระเงิน บิล #1"|aria-label="รับชำระเงิน บิล #2"/);
+ assert.match(html,/aria-label="รับชำระเงิน บิล #3"/);assert.match(html,/aria-label="รับชำระเงิน บิล #4"/);
+ assert.match(html,/aria-label="เปิดบิล #1"/);assert.match(html,/รอครัวทำอาหารเสร็จ/);
+});

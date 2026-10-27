@@ -1,0 +1,23 @@
+.dashboard-chart-scroll{overflow-x:auto;min-width:0}.dashboard-chart{gap:12px}.dashboard-chart .chart-column{min-width:0}.dashboard-chart .chart-column>span{white-space:nowrap;font-size:10px}.dashboard-chart .chart-column>small{white-space:nowrap;font-size:10px}.dashboard-empty-note{padding:16px 24px;color:var(--muted);font-size:12px}.dashboard-food-placeholder{display:grid;place-items:center;width:44px;height:44px;border-radius:9px;background:var(--surface-soft,#edf0e8);color:var(--muted);flex-shrink:0}.dashboard-sales-note{padding:14px 24px;color:var(--muted);font-size:10px;line-height:1.7}.dashboard-grid>.panel{min-width:0}.bestseller>div{min-width:0}.bestseller strong{overflow-wrap:anywhere}
+
+.dashboard-chart .chart-column>div{min-height:0}
+.stat-trend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:12px;font-size:12px;color:var(--muted)}
+.stat-trend b{display:inline-flex;align-items:center;border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:700}
+.stat-trend.good b{background:#e7f4ec;color:#2b7a52}
+.stat-trend.bad b{background:#fdeceb;color:#c4402b}
+.stat-trend.flat b{background:#f1f1ec;color:#5d635e}
+.stat-card.accent .stat-trend,.stat-card.accent .stat-trend span{color:rgba(255,255,255,.85)}
+.stat-card.accent .stat-trend b{background:rgba(255,255,255,.22);color:#fff}
+.dashboard-grid>.peak-hours{grid-column:1/-1}
+.peak-hours-summary{padding:0 26px 4px;font-size:13px;color:var(--text-2,#5d635e)}
+.peak-hours-summary strong{color:var(--text,#1d211f)}
+.peak-hours-chart{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:6px;align-items:end;height:170px;padding:18px 26px 22px}
+.peak-hour{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:8px;height:100%;min-width:0}
+.peak-hour>div{width:100%;min-height:3px;border-radius:6px 6px 3px 3px;background:#eceee6;transition:background .15s}
+.peak-hour:hover>div{background:#dfe2d7}
+.peak-hour.peak>div{background:linear-gradient(180deg,#f48a6b,#e55c3b)}
+.peak-hour small{height:14px;font-size:10.5px;color:var(--muted)}
+:root[data-theme=dark] .peak-hour>div{background:#363a35}
+:root[data-theme=dark] .peak-hour:hover>div{background:#41463f}
+:root[data-theme=dark] .peak-hour.peak>div{background:linear-gradient(180deg,#f48a6b,#e55c3b)}
+@media(max-width:640px){.peak-hours-chart{gap:3px;padding-inline:15px}.peak-hours-summary{padding-inline:15px}}

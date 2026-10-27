@@ -1,3 +1,4 @@
+import {isCooking} from '../shared/order-flow.mjs';
 import {useState} from 'react';
 import {ArrowRight,CheckCircle2,Clock,ReceiptText,Search,Wallet,X} from 'lucide-react';
 import type {Order} from './types';
@@ -23,7 +24,7 @@ export default function UnpaidBills({orders,tableName,amount,statusName,canPay,b
   {filtered.length?<ul className="unpaid-list">{filtered.map(order=><li key={order.id} className="unpaid-bill" data-order-id={order.id}>
    <div className="unpaid-identity"><button disabled={busy} className="unpaid-open" aria-label={`เปิดบิล #${order.number}`} onClick={()=>onOpen(order)}>#{order.number}<ArrowRight size={13}/></button><span>{order.tableId?`โต๊ะ ${tableName(order.tableId)}`:types[order.type]||order.type}</span><small title={new Date(order.createdAt).toLocaleString('th-TH')}><Clock size={11}/> เปิด {new Date(order.createdAt).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} · {elapsed(order.createdAt)}</small></div>
    <span className={'badge '+order.status}>{statusName[order.status]||order.status}</span><strong className="unpaid-amount">{baht(amount(order))}</strong>
-   <button disabled={busy} className="outline unpaid-pay" aria-label={`${canPay?'รับชำระเงิน':'ดูรายละเอียด'} บิล #${order.number}`} onClick={()=>canPay?onPay(order):onOpen(order)}>{canPay?<Wallet size={14}/>:<ReceiptText size={14}/>} {canPay?'รับชำระเงิน':'ดูรายละเอียด'}</button>
+   {canPay&&isCooking(order)?<span className="muted unpaid-payment-wait">รอครัวทำอาหารเสร็จ</span>:<button disabled={busy} className="outline unpaid-pay" aria-label={`${canPay?'รับชำระเงิน':'ดูรายละเอียด'} บิล #${order.number}`} onClick={()=>canPay?onPay(order):onOpen(order)}>{canPay?<Wallet size={14}/>:<ReceiptText size={14}/>} {canPay?'รับชำระเงิน':'ดูรายละเอียด'}</button>}
   </li>)}</ul>:<p className="unpaid-empty">{needle?'ไม่พบบิลที่ตรงกับคำค้น':filter==='served'?'ยังไม่มีบิลที่เสิร์ฟครบแล้ว':'ไม่มีบิลค้างชำระในสาขานี้'}</p>}
  </section>;
 }
