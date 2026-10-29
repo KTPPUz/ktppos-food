@@ -18,3 +18,6 @@
 .guest-call-bar button.called{background:#eff4e7;border-color:#d6e2c4;color:#7f9a67}
 .guest-call-bar button:disabled{cursor:default}
 .guest-call-bar small{display:block;font-size:9px;opacity:.8}
+.kitchen-board.serve-only{display:block}
+.serve-only .kitchen-column{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-items:start;align-content:start;min-height:0}
+.serve-only .kitchen-column>h3,.serve-only .kitchen-column>.empty{grid-column:1/-1}

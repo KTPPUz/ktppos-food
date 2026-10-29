@@ -158,7 +158,7 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
       const u=req.user;feature(u,'medium');const o=getOrder(u,req.params.id);if(!(o.status==='paid'&&needsService(o)))requireOpen(o);
       const b=o.kitchenBatches?.find(b=>b.id===req.params.batchId);assert(b,'ไม่พบรอบครัว',404);
       const next={pending:'cooking',cooking:'ready',ready:'served'}[b.status];assert(next===req.body.status,'สถานะรอบครัวไม่ถูกต้อง',409);
-      allowed(u,next==='served'?'tables':'kitchen');b.status=next;
+      allowed(u,next==='served'?'serve':'kitchen');b.status=next;
       for(const item of o.items.filter(i=>b.itemIds.includes(i.id)))item.status=next;
       syncBatches(o);if(o.status==='paid')onOrderClosed(o);audit(u,'สถานะรอบครัว',`#${o.number} · รอบ ${b.round} → ${next}`,o.branchId);persist();res.json(o);
     });

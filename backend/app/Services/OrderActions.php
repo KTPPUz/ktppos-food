@@ -96,7 +96,7 @@ trait OrderActions
             } else {
                 $this->feature();
                 $this->check((['draft' => 'pending', 'pending' => 'cooking', 'cooking' => 'ready', 'ready' => 'served'][OrderFlow::kitchenStatus($order)] ?? null) === $status, 'เปลี่ยนสถานะตามลำดับเท่านั้น', 409);
-                $this->allowed($status === 'pending' ? 'pos' : ($status === 'served' ? 'tables' : 'kitchen'));
+                $this->allowed($status === 'pending' ? 'pos' : ($status === 'served' ? 'serve' : 'kitchen'));
             }
             if ($order['status'] === 'paid') {
                 $order['kitchenStatus'] = $status;
@@ -136,7 +136,7 @@ trait OrderActions
                 $found = true;
                 $next = ['pending' => 'cooking', 'cooking' => 'ready', 'ready' => 'served'][$batch['status']] ?? null;
                 $this->check($next !== null && $next === ($body['status'] ?? null), 'สถานะรอบครัวไม่ถูกต้อง', 409);
-                $this->allowed($next === 'served' ? 'tables' : 'kitchen');
+                $this->allowed($next === 'served' ? 'serve' : 'kitchen');
                 $order['kitchenBatches'][$index]['status'] = $next;
                 foreach ($order['items'] as &$item) {
                     if (in_array($item['id'], $batch['itemIds'], true)) {
