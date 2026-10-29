@@ -91,7 +91,6 @@ final class PrepaidKitchenTest extends TestCase
         }
         $this->patchJson($path.'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'ready'], $waiter)->assertForbidden();
         $this->patchJson($path.'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'ready'], $cook)->assertOk()->assertJsonPath('status', 'paid');
-        $this->patchJson($path.'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'served'], $cook)->assertForbidden();
         $this->patchJson($path.'/kitchen-batches/'.$first['batchId'].'/status', ['status' => 'served'], $waiter)->assertOk()->assertJsonPath('kitchenStatus', 'pending');
         foreach (['cooking', 'ready', 'served'] as $status) {
             $this->patchJson($path.'/kitchen-batches/'.$second['batchId'].'/status', compact('status'), $this->owner)->assertOk()->assertJsonPath('status', 'paid');

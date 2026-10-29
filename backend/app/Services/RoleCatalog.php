@@ -29,7 +29,7 @@ final class RoleCatalog
         'pos' => ['Owner', 'Manager', 'Cashier', 'Waiter', 'HQ Admin'],
         'pay' => ['Owner', 'Manager', 'Cashier', 'HQ Admin'],
         'kitchen' => ['Owner', 'Manager', 'Kitchen', 'HQ Admin'],
-        'serve' => ['Owner', 'Manager', 'Cashier', 'Waiter', 'HQ Admin'],
+        'serve' => ['Owner', 'Manager', 'Waiter', 'Kitchen', 'HQ Admin'],
         'tables' => ['Owner', 'Manager', 'Cashier', 'Waiter', 'HQ Admin'],
         'reports' => ['Owner', 'Manager', 'Cashier', 'HQ Admin'],
         'inventory' => ['Owner', 'Manager', 'HQ Admin'], 'menu' => ['Owner', 'Manager', 'HQ Admin'],

@@ -64,7 +64,7 @@ final class RolePermissionsTest extends TestCase
         $this->getJson('/api/roles', $this->owner)->assertJsonPath('0.members', 1);
     }
 
-    public function test_waiter_sees_serve_menu_and_can_mark_ready_food_served_but_not_cook(): void
+    public function test_waiter_sees_serve_menu_and_can_serve_but_not_cook(): void
     {
         $waiter = $this->login('restaurant-u3');
         $state = $this->getJson('/api/state', $waiter)->assertOk();
@@ -77,8 +77,17 @@ final class RolePermissionsTest extends TestCase
         foreach (['cooking', 'ready'] as $status) {
             $this->patchJson('/api/orders/'.$order['id'].'/status', compact('status'), $kitchen)->assertOk();
         }
-        $this->patchJson('/api/orders/'.$order['id'].'/status', ['status' => 'served'], $kitchen)->assertForbidden();
         $this->patchJson('/api/orders/'.$order['id'].'/status', ['status' => 'served'], $waiter)->assertOk();
+    }
+
+    public function test_kitchen_can_mark_ready_food_served_by_default(): void
+    {
+        $kitchen = $this->login('restaurant-u4');
+        $this->assertContains('serve', $this->getJson('/api/state', $kitchen)->assertOk()->json('permissions'));
+        $order = $this->postJson('/api/orders', ['branchId' => 'r1', 'type' => 'takeaway', 'items' => [['menuId' => 'm1', 'qty' => 1]]], $this->owner)->assertCreated()->json();
+        foreach (['pending', 'cooking', 'ready', 'served'] as $status) {
+            $this->patchJson('/api/orders/'.$order['id'].'/status', compact('status'), $status === 'pending' ? $this->owner : $kitchen)->assertOk();
+        }
     }
 
     public function test_serve_permission_is_granted_per_role_independently_of_tables_and_kitchen(): void

@@ -1,8 +1,8 @@
 import type {State} from './types';
 export type NavigationState={page:string;branch:string;settingsTab:'general'|'tables'|'categories';staffTab:'team'|'roles'};
-export type NavigationItem={id:string;perm:string;medium?:boolean;enterprise?:boolean};
+export type NavigationItem={id:string;perm:string;medium?:boolean;enterprise?:boolean;hiddenWith?:string};
 export function allowedPages(state:State,items:readonly NavigationItem[]):string[]{
- return items.filter(item=>state.permissions.includes(item.perm)&&(!state.visibleMenus||state.visibleMenus.includes(item.id))&&(!item.medium||state.tenant.plan!=='Small')&&(!item.enterprise||state.tenant.plan==='Enterprise')).map(item=>item.id);
+ return items.filter(item=>state.permissions.includes(item.perm)&&!(item.hiddenWith&&state.permissions.includes(item.hiddenWith))&&(!state.visibleMenus||state.visibleMenus.includes(item.id))&&(!item.medium||state.tenant.plan!=='Small')&&(!item.enterprise||state.tenant.plan==='Enterprise')).map(item=>item.id);
 }
 export function navigationKey(tenantId:string,userId:string):string{return `ktp-navigation-v1:${encodeURIComponent(tenantId)}:${encodeURIComponent(userId)}`;}
 export function readNavigation(storage:Pick<Storage,'getItem'>,key:string):Partial<NavigationState>{

@@ -1,6 +1,6 @@
 export const management=['Owner','Manager','HQ Admin'];
 export const permissions={
- pos:['Owner','Manager','Cashier','Waiter','HQ Admin'], pay:['Owner','Manager','Cashier','HQ Admin'], kitchen:['Owner','Manager','Kitchen','HQ Admin'], serve:['Owner','Manager','Cashier','Waiter','HQ Admin'], tables:['Owner','Manager','Cashier','Waiter','HQ Admin'], reports:['Owner','Manager','Cashier','HQ Admin'], inventory:['Owner','Manager','HQ Admin'], menu:['Owner','Manager','HQ Admin'], staff:['Owner','Manager','HQ Admin'], settings:['Owner','HQ Admin'], hq:['Owner','HQ Admin'], refund:['Owner','Manager','HQ Admin'], audit:['Owner','Manager','HQ Admin']
+ pos:['Owner','Manager','Cashier','Waiter','HQ Admin'], pay:['Owner','Manager','Cashier','HQ Admin'], kitchen:['Owner','Manager','Kitchen','HQ Admin'], serve:['Owner','Manager','Waiter','Kitchen','HQ Admin'], tables:['Owner','Manager','Cashier','Waiter','HQ Admin'], reports:['Owner','Manager','Cashier','HQ Admin'], inventory:['Owner','Manager','HQ Admin'], menu:['Owner','Manager','HQ Admin'], staff:['Owner','Manager','HQ Admin'], settings:['Owner','HQ Admin'], hq:['Owner','HQ Admin'], refund:['Owner','Manager','HQ Admin'], audit:['Owner','Manager','HQ Admin']
 };
 export function assert(condition,message='ข้อมูลไม่ถูกต้อง',status=400){if(!condition)throw Object.assign(new Error(message),{status});}
 export function money(value){return Math.round((value+Number.EPSILON)*100)/100;}
