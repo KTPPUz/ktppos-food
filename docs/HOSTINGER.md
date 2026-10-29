@@ -1,5 +1,7 @@
 # Laravel / PHP + MariaDB บน Hostinger (ไม่ใช้ VPS)
 
+สำหรับโดเมน **restaurant.itfeature.tech** ใช้ [ขั้นตอนติดตั้งและอัปเดตล่าสุด](HOSTINGER-RELEASE.md) พร้อมไฟล์ `deploy/hostinger.env.example`
+
 Stack หลัก: React 19 + TypeScript + Vite → Laravel 12 / PHP 8.3 → MariaDB ผ่าน Eloquent ส่วน phpMyAdmin เป็นหน้าจัดการฐานข้อมูล ไม่ใช่ตัวฐานข้อมูล
 
 ## เครื่องพัฒนา

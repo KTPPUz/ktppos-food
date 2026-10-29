@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+const source=path.resolve('.artifacts/hostinger'),target=path.resolve('.artifacts/filezilla');
+assert.ok(fs.existsSync(path.join(source,'laravel/vendor/autoload.php')),'Run npm run package:hostinger first.');
+const html=fs.readFileSync(path.join(source,'public_html/index.html'),'utf8');
+assert.ok(/src="\/assets\/[^\"]+\.js"/.test(html),'Compiled frontend required');
+assert.ok(!html.includes('/src/main.tsx'),'Do not upload the development index.html');
+fs.rmSync(target,{recursive:true,force:true});fs.mkdirSync(target,{recursive:true});
+fs.cpSync(path.join(source,'laravel'),path.join(target,'laravel-restaurant'),{recursive:true});
+fs.cpSync(path.join(source,'public_html'),path.join(target,'restaurant'),{recursive:true});
+const entry=path.join(target,'restaurant/index.php');
+const index=fs.readFileSync(entry,'utf8');
+assert.equal(index.split("__DIR__.'/../laravel/").length-1,3,'Unexpected PHP entry paths');
+fs.writeFileSync(entry,index.replaceAll("__DIR__.'/../laravel/","__DIR__.'/../../laravel-restaurant/"));
+fs.copyFileSync('deploy/hostinger.env.example',path.join(target,'HOSTINGER.env.example'));
+fs.writeFileSync(path.join(target,'UPLOAD.txt'),`Target: https://restaurant.itfeature.tech\n\n1. Move the existing project folder out of public_html to preserve its .env, data and uploads privately.\n2. Upload laravel-restaurant to /domains/itfeature.tech/laravel-restaurant\n3. Upload restaurant to /domains/itfeature.tech/public_html/restaurant\n4. PHP entry paths are already configured. Do not edit them.\n5. Create laravel-restaurant/.env using HOSTINGER.env.example. For a SQL restore, preserve the source APP_KEY.\n6. Import the database and copy uploaded images separately. Do not overwrite an existing production .env or storage.\n7. Verify /healthz returns HTTP 200.\n\nDo not upload the project root, src, node_modules, .git or .data into public_html.\n`);
+console.log('Ready: .artifacts/filezilla/{laravel-restaurant,restaurant}; entry paths preconfigured.');
