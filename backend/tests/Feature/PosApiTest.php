@@ -110,6 +110,25 @@ final class PosApiTest extends TestCase
         $this->assertSame('draft', PosOrder::find($order['id'])->payload['status']);
     }
 
+    public function test_guest_can_call_staff_and_request_bill_until_staff_resolves(): void
+    {
+        $session = $this->qr();
+        $token = $session['token'];
+        $this->api('POST', '/guest/'.$token.'/calls', ['type' => 'drink'])->assertStatus(400);
+        $first = $this->api('POST', '/guest/'.$token.'/calls', ['type' => 'staff'])->assertCreated()->assertJsonPath('duplicate', false)->json();
+        $this->api('POST', '/guest/'.$token.'/calls', ['type' => 'staff'])->assertOk()->assertJsonPath('duplicate', true);
+        $this->api('POST', '/guest/'.$token.'/calls', ['type' => 'bill'])->assertCreated();
+        $this->assertCount(1, $first['session']['calls']);
+        $calls = collect($this->api('GET', '/state', [], $this->owner)->assertOk()->json('tableSessions'))->firstWhere('id', $session['id'])['calls'];
+        $this->assertSame(['bill', 'staff'], collect($calls)->pluck('type')->sort()->values()->all());
+        $this->api('POST', '/table-sessions/'.$session['id'].'/calls/'.$calls[0]['id'].'/resolve', [])->assertStatus(401);
+        $this->api('POST', '/table-sessions/'.$session['id'].'/calls/'.$calls[0]['id'].'/resolve', [], $this->owner)->assertOk();
+        $this->api('POST', '/table-sessions/'.$session['id'].'/calls/missing/resolve', [], $this->owner)->assertStatus(404);
+        $this->assertCount(1, $this->api('GET', '/guest/'.$token)->json('session.calls'));
+        $this->api('POST', '/guest/'.$token.'/calls', ['type' => $calls[0]['type']])->assertCreated();
+        $this->api('POST', '/guest/'.str_repeat('a', 48).'/calls', ['type' => 'staff'])->assertStatus(404);
+    }
+
     public function test_guest_qr_retry_rounds_encryption_and_payment_close(): void
     {
         $session = $this->qr();

@@ -17,7 +17,7 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
     return data.tableSessions.find(s=>s.tableId===tableId&&isActive(s));
   }
   function sessionSummary(s) {
-    return {id:s.id,tableId:s.tableId,branchId:s.branchId,orderIds:s.orderIds,active:isActive(s),acceptingOrders:isActive(s)&&s.acceptingOrders,expiresAt:s.expiresAt};
+    return {id:s.id,tableId:s.tableId,branchId:s.branchId,orderIds:s.orderIds,active:isActive(s),acceptingOrders:isActive(s)&&s.acceptingOrders,expiresAt:s.expiresAt,calls:(s.calls||[]).filter(c=>c.status==='open').map(({id,type,at})=>({id,type,at}))};
   }
   function syncBatches(o) {
     if((terminal.has(o.status)&&o.status!=='paid')||!o.kitchenBatches?.length)return;
@@ -112,6 +112,14 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
       audit({tenantId:s.tenantId,branchId:s.branchId,name:`ลูกค้าโต๊ะ ${data.tables.find(t=>t.id===s.tableId).name}`,role:'Customer'},'ลูกค้าสั่งผ่าน QR',`#${o.number} · รอบ ${batch.round} · ${items.reduce((s,i)=>s+i.qty,0)} รายการ`,s.branchId);
       persist();res.status(201).json({orderId:o.id,batchId:batch.id,duplicate:false,...guestState(s),categories});
     });
+    app.post('/api/guest/:token/calls',(req,res)=>{
+      res.set('Cache-Control','no-store');const s=getGuest(req.params.token);
+      assert(isActive(s),'QR หมดอายุหรือรอบบริการสิ้นสุดแล้ว กรุณาติดต่อพนักงาน',410);
+      const type=req.body.type;assert(['staff','bill'].includes(type),'ประเภทการเรียกไม่ถูกต้อง');
+      s.calls??=[];const duplicate=s.calls.some(c=>c.status==='open'&&c.type===type);
+      if(!duplicate){s.calls.push({id:uid(),type,status:'open',at:now()});s.calls=s.calls.slice(-30);persist();}
+      res.status(duplicate?200:201).json({duplicate,...guestState(s),categories});
+    });
     // Unknown public guest paths must not fall through to employee APIs or the SPA.
     app.use('/api/guest',(_,res)=>res.status(404).json({error:'ไม่พบช่องทางสั่งอาหาร'}));
   }
@@ -132,6 +140,13 @@ export function createTableOrdering({randomToken,fingerprint,data,catalog,parseI
         data.tableSessions.push(s);audit(u,'เปิด QR สั่งอาหาร',`${t.name} · รอบ ${s.id}`,t.branchId);persist();
       }
       res.json({...sessionSummary(s),token:s.token});
+    });
+    app.post('/api/table-sessions/:id/calls/:callId/resolve',(req,res)=>{
+      const u=req.user;allowed(u,'tables');feature(u,'medium');
+      const s=data.tableSessions.find(s=>s.id===req.params.id&&scope(u,s));assert(s,'ไม่พบรอบโต๊ะ',404);
+      const call=s.calls?.find(c=>c.id===req.params.callId);assert(call,'ไม่พบการเรียกนี้',404);
+      if(call.status==='open'){call.status='done';call.doneAt=now();call.doneBy=u.id;persist();}
+      res.json({ok:true});
     });
     app.post('/api/table-sessions/:id/close',(req,res)=>{
       const u=req.user;allowed(u,'tables');feature(u,'medium');

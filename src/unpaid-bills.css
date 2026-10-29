@@ -21,3 +21,7 @@
 .unpaid-search{margin:4px 18px 12px;max-width:520px;width:calc(100% - 36px)}
 .unpaid-search input{min-width:0}
 @media(max-width:540px){.unpaid-search{margin-inline:12px;width:calc(100% - 24px)}}
+.unpaid-bill.bill-requested{background:#eef8f1;box-shadow:inset 4px 0 0 var(--green,#3f8f68)}
+.unpaid-bill-request{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--green,#3f8f68);color:#fff;font-size:10px;font-weight:700;animation:bill-request-pulse 1.6s ease-in-out infinite}
+@keyframes bill-request-pulse{50%{box-shadow:0 0 0 5px rgba(63,143,104,.22)}}
+@media(prefers-reduced-motion:reduce){.unpaid-bill-request,.service-call{animation:none}}

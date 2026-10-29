@@ -30,3 +30,13 @@ test('lost response retries same request without duplicating kitchen items',asyn
  await guest.route('**/api/guest/**',async route=>{const req=route.request();if(req.method()==='GET'&&blockRead)return route.abort('failed');if(req.method()==='POST'){keys.push(req.postDataJSON().requestId);if(first){first=false;await route.fetch();return route.abort('failed');}}return route.continue();});
  await guest.locator('.guest-menu-card').first().click();await guest.getByRole('button',{name:'เพิ่มในตะกร้า'}).click();await guest.locator('.guest-cart-bar button').click();await guest.getByRole('button',{name:'ยืนยันส่งเข้าครัว'}).click();await expect(guest.getByRole('button',{name:'ลองส่งรายการเดิมอีกครั้ง'})).toBeEnabled();blockRead=false;await guest.getByRole('button',{name:'ลองส่งรายการเดิมอีกครั้ง'}).click();await expect(guest.locator('.guest-round')).toHaveCount(1);await expect(guest.locator('.guest-ordered-item')).toHaveCount(1);expect(keys).toHaveLength(2);expect(keys[0]).toBe(keys[1]);await guest.reload();await expect(guest.locator('.guest-cart-bar')).toHaveCount(0);await context.close();
 });
+
+test('customer can call staff or ask for the bill and staff acknowledge the alert',async({page,browser})=>{
+ await login(page);const url=await qr(page,'T14');await page.getByRole('button',{name:'ปิด',exact:true}).click();
+ const context=await browser.newContext({viewport:{width:390,height:844}}),guest=await context.newPage();await guest.goto(url);await expect(guest.locator('.guest-menu-card')).toHaveCount(30);
+ await guest.getByRole('button',{name:'เรียกพนักงาน'}).click();await expect(guest.getByRole('button',{name:/เรียกพนักงาน/})).toBeDisabled();await expect(guest.getByRole('button',{name:/เรียกพนักงาน/})).toContainText('รอพนักงาน');
+ await guest.getByRole('button',{name:'ขอเช็คบิล'}).click();
+ await page.getByRole('button',{name:'รีเฟรชข้อมูล'}).click();const alerts=page.locator('.service-call');await expect(alerts).toHaveCount(2);await expect(alerts.first()).toContainText('T14');
+ await alerts.filter({hasText:'เรียกพนักงาน'}).getByRole('button',{name:'รับทราบ'}).click();await expect(alerts).toHaveCount(1);await expect(alerts).toContainText('ขอเช็คบิล');
+ await guest.reload();await expect(guest.getByRole('button',{name:/เรียกพนักงาน/})).toBeEnabled();await context.close();
+});

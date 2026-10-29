@@ -221,7 +221,30 @@ final class PosService
 
     private function summary(array $session): array
     {
-        return ['id' => $session['id'], 'tableId' => $session['tableId'], 'branchId' => $session['branchId'], 'orderIds' => $session['orderIds'], 'active' => $this->active($session), 'acceptingOrders' => $this->active($session) && $session['acceptingOrders'], 'expiresAt' => $session['expiresAt']];
+        return ['id' => $session['id'], 'tableId' => $session['tableId'], 'branchId' => $session['branchId'], 'orderIds' => $session['orderIds'], 'active' => $this->active($session), 'acceptingOrders' => $this->active($session) && $session['acceptingOrders'], 'expiresAt' => $session['expiresAt'], 'calls' => $this->openCalls($session)];
+    }
+
+    private function openCalls(array $session): array
+    {
+        return array_values(array_map(fn ($c) => array_intersect_key($c, array_flip(['id', 'type', 'at'])), array_filter($session['calls'] ?? [], fn ($c) => $c['status'] === 'open')));
+    }
+
+    private function guestCall(string $token, array $body): array
+    {
+        $this->check(preg_match('/^[a-f0-9]{48}$/D', $token), 'ไม่พบ QR สำหรับโต๊ะนี้', 404);
+        $session = &$this->record('tableSessions', fn ($s) => hash_equals($s['token'], $token), 'ไม่พบ QR สำหรับโต๊ะนี้');
+        $this->check($this->first('tenants', fn ($t) => $t['id'] === $session['tenantId'])['plan'] !== 'Small', 'ร้านนี้ยังไม่เปิดรับออเดอร์ผ่าน QR', 403);
+        $this->check($this->active($session), 'QR หมดอายุหรือรอบบริการสิ้นสุดแล้ว กรุณาติดต่อพนักงาน', 410);
+        $type = $body['type'] ?? null;
+        $this->check(in_array($type, ['staff', 'bill'], true), 'ประเภทการเรียกไม่ถูกต้อง');
+        $duplicate = (bool) array_filter($session['calls'] ?? [], fn ($c) => $c['status'] === 'open' && $c['type'] === $type);
+        if (! $duplicate) {
+            $session['calls'][] = ['id' => $this->uid(), 'type' => $type, 'status' => 'open', 'at' => $this->now()];
+            $session['calls'] = array_slice($session['calls'], -30);
+            $this->dirty = true;
+        }
+
+        return ['status' => $duplicate ? 200 : 201, 'body' => ['duplicate' => $duplicate, ...$this->guestState($session)]];
     }
 
     private function syncBatches(array &$order): void
@@ -424,8 +447,11 @@ final class PosService
 
             return ['body' => ['token' => $token, 'user' => $this->safe($user)]];
         }
-        if (preg_match('#^/guest/([^/]+)(/orders)?$#D', $path, $match)) {
+        if (preg_match('#^/guest/([^/]+)(/orders|/calls)?$#D', $path, $match)) {
             $this->check(($method === 'GET' && empty($match[2])) || ($method === 'POST' && ! empty($match[2])), 'ไม่พบ API', 404);
+            if (($match[2] ?? '') === '/calls') {
+                return $this->guestCall($match[1], $body);
+            }
 
             return $this->guest($match[1], $method === 'POST', $body);
         }
@@ -485,6 +511,19 @@ final class PosService
         }
         if (preg_match('#^/tables/([^/]+)/(session|reservation)$#D', $path, $m)) {
             return ['body' => $this->tableAction($m[1], $m[2], $method, $body)];
+        }
+        if (preg_match('#^/table-sessions/([^/]+)/calls/([^/]+)/resolve$#D', $path, $m) && $method === 'POST') {
+            $this->allowed('tables');
+            $this->feature();
+            $session = &$this->record('tableSessions', fn ($s) => $s['id'] === $m[1] && $this->scope($s));
+            $index = array_search($m[2], array_column($session['calls'] ?? [], 'id'), true);
+            $this->check($index !== false, 'ไม่พบการเรียกนี้', 404);
+            if ($session['calls'][$index]['status'] === 'open') {
+                $session['calls'][$index] = [...$session['calls'][$index], 'status' => 'done', 'doneAt' => $this->now(), 'doneBy' => $this->user['id']];
+                $this->dirty = true;
+            }
+
+            return ['body' => ['ok' => true]];
         }
         if (preg_match('#^/table-sessions/([^/]+)/close$#D', $path, $m) && $method === 'POST') {
             $this->allowed('tables');
